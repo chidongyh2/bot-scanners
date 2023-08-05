@@ -1,0 +1,46 @@
+.facebook.com	TRUE	/login/device-based/	FALSE	1724073600	dbln	%7B%22100093378284020%22%3A%222gWEnDB6%22%7D
+.facebook.com	TRUE	/	FALSE	1724073600	datr	cwq0ZDn3HqjPqAW1CAfwXAcw
+.facebook.com	TRUE	/	FALSE	1724073600	sb	cwq0ZB9xKouzRd1d_ixiMsB6
+.facebook.com	TRUE	/	FALSE	-1	dpr	1.25
+.facebook.com	TRUE	/	FALSE	-1	presence	C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1689766404498%2C%22v%22%3A1%7D
+.facebook.com	TRUE	/	FALSE	-1	wd	508x50
+.facebook.com	TRUE	/	FALSE	1721310848	c_user	100093378284020
+.facebook.com	TRUE	/	FALSE	1697550848	fr	0LHm6otmomFfrIViq.AWVzuAVawqIjJiEARWcBrh2GvBM.BkuAcQ.QP.AAA.0.0.BkuAcQ.AWWzrQ5FFRU
+.facebook.com	TRUE	/	FALSE	1721310848	xs	18%3A0Tw4gvch9C7S1g%3A2%3A1689520758%3A-1%3A-1%3A%3AAcXr_qIpmNeZN9GDAfb_085VdQQ0ySUNkHPhPNiqew
+
+==========================================
+
+{
+  "Id": "100093378284020",
+  "Name": "Stela Martin",
+  "BirthDay": "11/10/2000",
+  "Email": "stelamartin2023@gmail.com",
+  "Gender": "female",
+  "Location": "Barcelona, Spain",
+  "Hometown": "Barcelona, Spain",
+  "TwoFactorEnabled": false,
+  "CreationTime": 1691172139769,
+  "PictureUrl": "https://scontent-sin6-4.xx.fbcdn.net/v/t1.30497-1/143086968_2856368904622192_1959732218791162458_n.png?_nc_cat=1&cb=99be929b-59f725be&ccb=1-7&_nc_sid=0c64ff&_nc_ohc=go7e2rSOKFwAX-mrhuq&_nc_ht=scontent-sin6-4.xx&oh=00_AfBIg4oB8_rsPUdG3bv59P0jGP9QBV4i7r7dk_Az59s5_Q&oe=64F49E78",
+  "AdsAccounts": [
+    {
+      "Id": "211025978524135",
+      "Name": "Stela Martin",
+      "Currency": "PKR",
+      "LimitDay": 49.99998552570527,
+      "AmountSpent": 0.0,
+      "Balance": 0.0,
+      "AccountStatus": "ACTIVE",
+      "DisableReason": "NONE",
+      "IsUserAllowedToAdvertise": true,
+      "StoredBalanceStatus": "new_user",
+      "Tags": [
+        1
+      ]
+    }
+  ],
+  "log_id": "F7E0E1679866D2CE56D99CB1812D0B03FB22B333808CB7122A201B0CDC3557C7",
+  "Tags": [
+    1
+  ]
+}
+Source: AUGUST 3 - 38781 LOGS2.rar\PK_111.88.112.169_26-07-23
