@@ -1,0 +1,277 @@
+
+ ______     ______   ______     ______     __         ______
+/\  ___\   /\__  _\ /\  ___\   /\  __ \   /\ \       /\  ___\
+\ \___  \  \/_/\ \/ \ \  __\   \ \  __ \  \ \ \____  \ \ \____
+ \/\_____\    \ \_\  \ \_____\  \ \_\ \_\  \ \_____\  \ \_____\
+  \/_____/     \/_/   \/_____/   \/_/\/_/   \/_____/   \/_____/
+
+                       stealc stealer
+
+powerful native stealer based on C lang
+
+forum topics:
+	- https://forum.exploit.in/topic/220340/
+	- https://xss.is/threads/79592/
+	- https://bhf.im/threads/666154/
+
+buy:
+	- telegram: t.me/plym0uth
+
+----------------------------------------------------------------
+
+Network Info:
+	- IP: 121.121.49.48
+	- Country: MY
+
+System Summary:
+	- HWID: 13C8CFB942A2699293130
+	- OS: Windows 10 Enterprise
+	- Architecture: x64
+	- UserName: McComas
+	- Computer Name: DESKTOP-S1C7LB7
+	- Local Time: 2023/7/28 23:47:10
+	- UTC: 8
+	- Language: en-US
+	- Keyboards: English (United States) / Chinese (Simplified, China)
+	- Laptop: FALSE
+	- Running Path: C:\Windows\SysWOW64\explorer.exe
+	- CPU: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
+	- Cores: 4
+	- Threads: 8
+	- RAM: 32724 MB
+	- Display Resolution: 2560x1440
+	- GPU:
+		-NVIDIA GeForce GTX 1080
+		-NVIDIA GeForce GTX 1080
+		-NVIDIA GeForce GTX 1080
+		-NVIDIA GeForce GTX 1080
+
+User Agents:
+	Google Chrome - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.110 Safari/537.36
+
+Installed Apps:
+All Users:
+	Adobe Creative Cloud - 4.5.0.331
+	Adobe After Effects CC 2017 - 14.0.0
+	Adobe Audition CC 2017 - 10.0.0
+	Battle.net
+	Google Chrome - 115.0.5790.110
+	SIV - 1.19.0325.1
+	Microsoft Edge - 115.0.1901.183
+	Microsoft Edge Update - 1.3.177.11
+	Microsoft Edge WebView2 Runtime - 115.0.1901.183
+	Adobe Premiere Pro CC 2018 - 12.1.2
+	Rockstar Games Launcher - 1.0.74.1546_B
+	Rockstar Games Social Club - 2.1.8.4
+	StarCraft II
+	Steam - 2.10.91.91
+	Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.30501 - 12.0.30501.0
+	Patriot Viper M2 SSD RGB - 1.1.0.1
+	Microsoft Visual C++ 2013 x86 Minimum Runtime - 12.0.21005 - 12.0.21005
+	PDF Settings CC - 12.0
+	Microsoft Visual C++ 2015-2022 Redistributable (x64) - 14.31.31103 - 14.31.31103.0
+	Adobe Photoshop CC - 14.0
+	Microsoft Visual C++ 2012 Redistributable (x86) - 11.0.61030 - 11.0.61030.0
+	Sound Blaster Recon3Di - 1.03.24
+	ENE_External_Device_HAL - 1.0.10.4
+	Microsoft Visual C++ 2015-2022 Redistributable (x86) - 14.31.31103 - 14.31.31103.0
+	Sound Blaster Recon3Di Extras - 1.0
+	Microsoft Visual C++ 2022 X86 Additional Runtime - 14.31.31103 - 14.31.31103
+	ENE_EHD_M2_HAL - 1.0.10.1
+	Microsoft Visual C++ 2005 Redistributable - 8.0.61001
+	Microsoft Visual C++ 2005 Redistributable - 8.0.56336
+	WD P40 Game Drive - 1.0.2.18
+	Microsoft Visual C++ 2022 X86 Minimum Runtime - 14.31.31103 - 14.31.31103
+	Adobe Lightroom - 6.6
+	ENE_AIC_Marvell_HAL - 1.0.7.0
+	Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.17 - 9.0.30729
+	Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.6161 - 9.0.30729.6161
+	CLEO 4.3 - 4.3
+	SIV - 1.19.0325.1
+	Microsoft Visual C++ 2012 x86 Additional Runtime - 11.0.61030 - 11.0.61030
+	Microsoft Visual C++ 2012 x86 Minimum Runtime - 11.0.61030 - 11.0.61030
+	ENE_MousePad_HAL - 1.0.1.8
+	ENE_DRAM_RGB_AIO - 1.0.4.16
+	Microsoft Visual C++ 2012 Redistributable (x64) - 11.0.61030 - 11.0.61030.0
+	Initial Unity version 0.139 - 0.139
+	NEF Codec - 1.31.2
+	ENE_X_AIC_HAL - 1.0.4.0
+	Microsoft Visual C++ 2010  x86 Redistributable - 10.0.40219 - 10.0.40219
+	Microsoft Visual C++ 2013 Redistributable (x86) - 12.0.30501 - 12.0.30501.0
+	Microsoft Visual C++ 2013 x86 Additional Runtime - 12.0.21005 - 12.0.21005
+	RGB Fusion - 3.22.1102.1
+Current User:
+	Discord - 1.0.9007
+	Microsoft Edge WebView2 Runtime - 115.0.1901.183
+	Microsoft OneDrive - 23.142.0709.0001
+	Web Installer - 4.0.6.177
+
+Process List:
+	System
+	Registry
+	smss.exe
+	csrss.exe
+	wininit.exe
+	services.exe
+	lsass.exe
+	svchost.exe
+	fontdrvhost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	NVDisplay.Container.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	Memory Compression
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	CTAudSvc.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	spoolsv.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	nvcontainer.exe
+	TeamViewer_Service.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	dasHost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	SearchIndexer.exe
+	svchost.exe
+	GoogleCrashHandler.exe
+	GoogleCrashHandler64.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	SgrmBroker.exe
+	uhssvc.exe
+	svchost.exe
+	SecurityHealthService.exe
+	svchost.exe
+	MsMpEng.exe
+	NisSrv.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	svchost.exe
+	csrss.exe
+	winlogon.exe
+	fontdrvhost.exe
+	dwm.exe
+	NVDisplay.Container.exe
+	nvcontainer.exe
+	sihost.exe
+	svchost.exe
+	nvcontainer.exe
+	svchost.exe
+	taskhostw.exe
+	explorer.exe
+	svchost.exe
+	svchost.exe
+	RGBFusion.exe
+	StartMenuExperienceHost.exe
+	NVIDIA Web Helper.exe
+	conhost.exe
+	RuntimeBroker.exe
+	SearchApp.exe
+	ctfmon.exe
+	RuntimeBroker.exe
+	ShellExperienceHost.exe
+	RuntimeBroker.exe
+	ChsIME.exe
+	taskhostw.exe
+	svchost.exe
+	TextInputHost.exe
+	PhoneExperienceHost.exe
+	RuntimeBroker.exe
+	nvsphelper64.exe
+	NVIDIA Share.exe
+	NVIDIA Share.exe
+	NVIDIA Share.exe
+	WhatsApp.exe
+	RuntimeBroker.exe
+	Cortana.exe
+	RuntimeBroker.exe
+	svchost.exe
+	SBRcni.exe
+	CTJckCfg.exe
+	SystemSettings.exe
+	ApplicationFrameHost.exe
+	UserOOBEBroker.exe
+	svchost.exe
+	Microsoft.Photos.exe
+	RuntimeBroker.exe
+	svchost.exe
+	svchost.exe
+	smartscreen.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	CompPkgSrv.exe
+	audiodg.exe
+	svchost.exe
+	chrome.exe
+	chrome.exe
+	chrome.exe
+	SearchProtocolHost.exe
+	SearchFilterHost.exe
+	SearchProtocolHost.exe
+	msiexec.exe
+	cmd.exe
+	conhost.exe
+	cmd.exe
+	conhost.exe
+	explorer.exe
+	explorer.exe

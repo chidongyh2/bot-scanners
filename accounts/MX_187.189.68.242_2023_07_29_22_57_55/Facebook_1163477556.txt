@@ -1,0 +1,48 @@
+.facebook.com	TRUE	/	FALSE	1698744320	datr	6ojxYvTMEB_MMeQaF0JNz6bc
+.facebook.com	TRUE	/	TRUE	1725821696	sb	6YjxYoz8KgFttA9VAAtyGazo
+.facebook.com	TRUE	/	TRUE	1691866496	wd	1280x720
+.facebook.com	TRUE	/	TRUE	1691866496	locale	en_GB
+.facebook.com	TRUE	/	TRUE	1691866496	dpr	1
+.facebook.com	TRUE	/	TRUE	1722797696	c_user	1163477556
+.facebook.com	TRUE	/	TRUE	1722797696	xs	39%3Apam_UaTF_lOIug%3A2%3A1691261660%3A-1%3A5580
+.facebook.com	TRUE	/	TRUE	1699037696	fr	0CCj1M3L3TmfSiaoo.AWWxqUy5dMl5NFfVD1t8WAQttZs.BjhCiN.la.AAA.0.0.Bkzprt.AWUKjTpgVos
+.facebook.com	TRUE	/	TRUE	-1	presence	C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1691261681448%2C%22v%22%3A1%7D
+
+==========================================
+
+{
+  "Id": "1163477556",
+  "Password": "Titina10",
+  "Name": "Diego Antonio Plaza",
+  "BirthDay": "09/27/1990",
+  "Email": "dplaza99@hotmail.com",
+  "Gender": "male",
+  "Location": "Monterrey",
+  "Hometown": "Monterrey",
+  "TwoFactorEnabled": false,
+  "CreationTime": 1691261687966,
+  "PictureUrl": "https://scontent-lax3-1.xx.fbcdn.net/v/t39.30808-1/277526966_10223838208240816_5588053164906289853_n.jpg?stp=c0.264.998.998a_dst-jpg&_nc_cat=102&cb=99be929b-59f725be&ccb=1-7&_nc_sid=0c64ff&_nc_eui2=AeGhgGd9x41dOrwZogEqy1T0a6xCDcbmRfRrrEINxuZF9ONQfv_YeLTW78vEl7dY4z4&_nc_ohc=NfAjdGNizMcAX9wKk8J&_nc_ht=scontent-lax3-1.xx&oh=00_AfCDJ-GTykqLjf4gT5ht63M0n-og_iwX6NMO46w4-x0kEw&oe=64D354FF",
+  "AdsAccounts": [
+    {
+      "Id": "209757197",
+      "Name": "lg1",
+      "Currency": "USD",
+      "LimitDay": 50.0,
+      "Threshold": 7.0,
+      "AmountSpent": 42.76,
+      "Balance": 0.76,
+      "AccountStatus": "DISABLED",
+      "DisableReason": "ADS_INTEGRITY_POLICY",
+      "IsUserAllowedToAdvertise": true,
+      "StoredBalanceStatus": "postpay",
+      "Tags": [
+        1
+      ]
+    }
+  ],
+  "log_id": "34ED26C35EA28A841946CE1489C19B96C41471F892645A204A03B6517A4D0017",
+  "Tags": [
+    1
+  ]
+}
+Source: logs_29.zip\logs_29/MX_187.189.68.242_2023_07_29_22_57_55

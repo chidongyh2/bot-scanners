@@ -1,0 +1,14 @@
+cppEmailOrUsername dplaza99@hotmail.com
+email dplaza99@hotmail.com
+email grplaza69@hotmail.com
+first_surname Plaza
+identifier diegoplazarogers@gmail.com
+identifier dplaza99@hotmail.com
+name Diego Antonio
+second_surname Rogers
+text 8119088946
+text @Daigetsg
+text @NeomxDaige
+text @ST_Daige
+text dplaza99@hotmail.com
+username dplaza99@hotmail.com
