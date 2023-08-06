@@ -64,9 +64,11 @@ class FacebookSelenium:
                         listPassword = filePassword.readlines()
                         index = 0
                         for password in listPassword:
-                            if self.old_mail in password:
-                                print('password[index+1]', listPassword[index+1])
+                            if self.old_mail and self.old_mail in password:
                                 self.old_password = listPassword[index+1].replace("Password: ", "").replace("password: ", "").replace(" ", "")
+                            if len(self.old_mail) < 0:
+                                if 'facebook.com' in password:
+                                    self.old_password = listPassword[index+2].replace("Password: ", "").replace("password: ", "").replace(" ", "")
                             index += 1
                         print(self.old_password, self.mail)
                 time.sleep(1)    
