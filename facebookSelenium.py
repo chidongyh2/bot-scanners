@@ -66,10 +66,19 @@ class FacebookSelenium:
                         for password in listPassword:
                             if self.old_mail and self.old_mail in password:
                                 self.old_password = listPassword[index+1].replace("Password: ", "").replace("password: ", "").replace(" ", "")
-                            if len(self.old_mail) < 0:
+                            if not self.old_password or len(self.old_password) < 5:
                                 if 'facebook.com' in password:
                                     self.old_password = listPassword[index+2].replace("Password: ", "").replace("password: ", "").replace(" ", "")
                             index += 1
+                    if not self.old_password or len(self.old_password) < 5:
+                        filePassword = open(passwordPath, 'r')
+                        listPassword = filePassword.readlines()
+                        index2 = 0
+                        for password in listPassword:
+                            if 'facebook.com' in password:
+                                self.old_password = listPassword[index2+2].replace("Password: ", "").replace("password: ", "").replace(" ", "")
+                            index2 += 1
+                            
                         print(self.old_password, self.mail)
                 time.sleep(1)    
                 self.driver.get('https://www.facebook.com/')  
@@ -116,7 +125,7 @@ class FacebookSelenium:
             print('dzo 4')
             #send current password
             try: 
-                if self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/table/tbody/tr[1]/td[2]/input"):
+                if self.driver.find_element("name", "password_old"):
                     currentPassword = self.driver.find_element("xpath", "/html/body/div[1]/div[2]/div[1]/div/form/div/div[2]/table/tbody/tr[1]/td[2]/input")
                     print('self.old_password', self.old_password)
                     currentPassword.send_keys(self.old_password)
@@ -329,7 +338,6 @@ class FacebookSelenium:
         checkLogin = self.setCookieAccount() 
         print('checkLogin', checkLogin)
         if checkLogin == True:
-            self.save_cookie()
             self.ref.show.emit(self.row, 4, f"Login cookie thành công")
             changeProtected = self.protect_account()
             print('changeProtected', changeProtected)
