@@ -57,6 +57,8 @@ class GmailSelenium:
 
     def run(self):
         options = webdriver.ChromeOptions()
+        options.add_argument(r"--user-data-dir=C:\Users\quy.ngovan\AppData\Local\Google\Chrome\User Data") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+        options.add_argument(r'--profile-directory=Profile 1') #e.g. Profile 3
         options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument("--disable-notifications")
         self.driver = webdriver.Chrome(options=options)
