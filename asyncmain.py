@@ -23,39 +23,40 @@ client = TelegramClient('bot', api_id, api_hash)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 async def listenTelegram(event_bus):
-    await client.start()
-    try: assert await client.connect()
-    except Exception as e: print(str(e))
-    async for messageInterface in client.iter_messages('PancakeswapLiquidity', limit):
-        message = messageInterface.message
-        if " 0x" in message:
-            tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
-            amount = message[message.index("amount"):(message.index("amount") + 17)]
-            isSwap = False
-            if "Tests passed" in message:
-                isSwap = True
-            date = arrow.get(messageInterface.date).to('local').format()
-            open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
+    print('dzo here')
+    # await client.start()
+    # try: assert await client.connect()
+    # except Exception as e: print(str(e))
+    # async for messageInterface in client.iter_messages('PancakeswapLiquidity', limit):
+    #     message = messageInterface.message
+    #     if " 0x" in message:
+    #         tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
+    #         amount = message[message.index("amount"):(message.index("amount") + 17)]
+    #         isSwap = False
+    #         if "Tests passed" in message:
+    #             isSwap = True
+    #         date = arrow.get(messageInterface.date).to('local').format()
+    #         open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
 
-    time.sleep(2)
-    event_bus.publish("updateData")
-    @client.on(events.NewMessage(chats=[-1001192416115]))
-    async def my_event_handler(event):
-        message = event.message.message
-        print('first', event.message.message, event.message.date)
-        if " 0x" in message:
-            tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
-            amount = message[message.index("amount"):(message.index("amount") + 17)]
-            isSwap = False
-            if "Tests passed" in message:
-                isSwap = True
-            date = arrow.get(event.message.date).to('local').format()
-            print('token from Pancake:', tokenKey.strip(), amount.strip(), isSwap)
-            open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
-            args = f"{tokenKey}|{amount}|{isSwap}|{date}"
-            event_bus.publish("newToken", args)
+    # time.sleep(2)
+    # event_bus.publish("updateData")
+    # @client.on(events.NewMessage(chats=[-1001192416115]))
+    # async def my_event_handler(event):
+    #     message = event.message.message
+    #     print('first', event.message.message, event.message.date)
+    #     if " 0x" in message:
+    #         tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
+    #         amount = message[message.index("amount"):(message.index("amount") + 17)]
+    #         isSwap = False
+    #         if "Tests passed" in message:
+    #             isSwap = True
+    #         date = arrow.get(event.message.date).to('local').format()
+    #         print('token from Pancake:', tokenKey.strip(), amount.strip(), isSwap)
+    #         open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
+    #         args = f"{tokenKey}|{amount}|{isSwap}|{date}"
+    #         event_bus.publish("newToken", args)
 
-    await client.run_until_disconnected()
+    # await client.run_until_disconnected()
 
 def runListenTelegram(event_bus):
     asyncio.run(listenTelegram(event_bus))
