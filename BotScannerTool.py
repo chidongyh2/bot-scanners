@@ -1,8 +1,7 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ScannerSelenium import GmailSelenium
-import os, time, subprocess
+from PyQt5 import QtCore, QtWidgets
+from ScannerWalletSelenium import ScannerWalletSelenium
+import os, time
 import pathlib
-import threading
 class BotScannerToolWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -17,7 +16,7 @@ class BotScannerToolWindow(object):
         self.thread_label.setObjectName("thread_label")
         self.thread_input = QtWidgets.QSpinBox(self.groupBox)
         self.thread_input.setGeometry(QtCore.QRect(64, 14, 42, 22))
-        self.thread_input.setProperty("value", 10)
+        self.thread_input.setProperty("value", 1)
         self.thread_input.setObjectName("thread_input")
         self.LD_link = QtWidgets.QLineEdit(self.groupBox)
         self.LD_link.setGeometry(QtCore.QRect(53, 50, 161, 20))
@@ -192,7 +191,7 @@ class BotScannerToolWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.groupBox.setTitle(_translate("MainWindow", "Settings"))
         self.thread_label.setText(_translate("MainWindow", "Thread:"))
-        self.LD_link.setText(_translate("MainWindow", "D:\\anyfolder"))
+        self.LD_link.setText(_translate("MainWindow", "E:\\QUYNV\\MMO\\LogsDiller Cloud_Free_573_#108"))
         self.delayLD_label.setText(_translate("MainWindow", "DelayLD:"))
         self.btn_LD_link.setText(_translate("MainWindow", "..."))
         self.thread_label_2.setText(_translate("MainWindow", "Path:"))
@@ -339,33 +338,36 @@ class BotScannerToolWindow(object):
     def ShowTable(self, row, column, text):
         self.table_wallets.setItem(row, column, QtWidgets.QTableWidgetItem(text))
         
-    def ChangeTextSuccessAndError(self, check, row, mail, password):
+    def ChangeTextSuccessAndError(self, check, row, status):
         time.sleep(5)
         # if check:
         #     self.success.setText(f"<p><span style=\" color:#00aa00;\">Success: {self.indexsuccess}</span></p>")
         # else:
         #     self.error.setText(f"<p><span style=\" color:#ff0000;\">Error: {self.indexerror}</span></p>")
-        
+        self.ShowTable(row, 3, True)
+        self.ShowTable(row, 4, status)
         self.runCount -= 1
         self.StartReg()
             
     def StartReg(self):
-        if self.thread_input.text() == "Start":
+        if self.btn_start.text() == "Start":
             print('self.index', self.index)
-            if len(self.list_hostmail) > self.index:
-                for vm in self.list_hostmail:
-                    if self.runCount < int(self.thread_input.text())  and len(self.list_hostmail) > self.index:
-                        mailInfo = self.list_hostmail[self.index]
-                        self.threadreg = StartQ(self, self.index, mailInfo.split("|")[0], mailInfo.split("|")[1])
-                        self.threadreg.start()
+            if self.list_wallets is None or len(self.list_wallets) == 0:
+                self.Mesagebox(text="Không có dữ liệu để thực hiện !")
+                return
+            if len(self.list_wallets) > self.index:
+                for vm in self.list_wallets:
+                    print(vm["path"], vm["wallet"])
+                    if self.runCount < int(self.thread_input.text())  and len(self.list_wallets) > self.index and vm["wallet"] == "MetaMask":
+                        wallet = self.list_wallets[self.index]
+                        self.threadreg = StartQ(self, self.index, wallet)
                         self.threadreg.show.connect(self.ShowTable)
                         self.threadreg.checksuccess.connect(self.ChangeTextSuccessAndError)
                         self.listthread.append(self.threadreg)
-                        self.index += 1
+                        self.threadreg.start()
                         self.runCount += 1
                         time.sleep(1)
-                        print('self', self.index, self.runCount)
-              
+                    self.index += 1
         else:
             for thread in self.listthread: thread.Stop()
             self.btn_start.setText('Start')
@@ -374,16 +376,15 @@ class BotScannerToolWindow(object):
 class StartQ(QtCore.QThread):
     delete = QtCore.pyqtSignal()
     show = QtCore.pyqtSignal(int, int, str)
-    checksuccess = QtCore.pyqtSignal(bool, int, str, str)
-    def __init__(self, ref, index, mail, password) -> None:
+    checksuccess = QtCore.pyqtSignal(bool, int, str)
+    def __init__(self, ref, index, wallet) -> None:
         super().__init__()
         self.ref = ref
         self.index = index
-        self.mail = mail
-        self.password = password
+        self.wallet = wallet
 
     def run(self):
-        self.reg = GmailSelenium(self.index, self.mail, self.password)
+        self.reg = ScannerWalletSelenium(self.index, self.wallet)
         self.reg.ref = self
         self.reg.run()
-        time.sleep(0.1)
+        time.sleep(0.2)
