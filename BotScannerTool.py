@@ -243,7 +243,10 @@ class BotScannerToolWindow(object):
         self.list_wallets = []
         self.runCount = 0
         self.index = 0
+        self.threadIndex = 0
+        self.runningJob = True
         self.btn_start.clicked.connect(self.StartReg)
+        self.btn_pause.clicked.connect(self.ActionStop)
         self.btn_start_2.clicked.connect(self.CheckFolder)
         self.btn_LD_link.clicked.connect(self.FileDialogLD)
 
@@ -251,6 +254,7 @@ class BotScannerToolWindow(object):
         if len(self.LD_link.text()) == 0 or not os.path.exists(self.LD_link.text()):
            self.Mesagebox(text="Chọn folder !")
            return
+        self.list_wallets = []
         rootPath = pathlib.Path(self.LD_link.text())
         self.recursiveDir(rootPath)
         self.table_wallets.setRowCount(0)
@@ -270,9 +274,9 @@ class BotScannerToolWindow(object):
     def recursiveDir(self, path: pathlib.Path, passwordRoot = None):
         password = None
         for item in path.iterdir():
-            if passwordRoot is None and item.is_file() and "passwords.txt" in str(item).lower():
+            if passwordRoot is None and item.is_file() and "password" in str(item).lower():
                 if os.path.exists(item):
-                    passwordReadFile = open(f"{item}", 'r')
+                    passwordReadFile = open(f"{item}", 'rb')
                     if passwordReadFile:
                         try:
                             list_password = passwordReadFile.read().splitlines()
@@ -280,9 +284,9 @@ class BotScannerToolWindow(object):
                                 try:
                                     if pwdstr is not None and len(str(pwdstr)) > 0 and 'Password:' in str(pwdstr):
                                         if password is None or len(password) == 0:
-                                            password = str(pwdstr).replace("Password:", "").replace(" ", "")
+                                            password = str(pwdstr).replace("b'", "").replace("'", "").replace("Password:", "").replace(" ", "")
                                         else:
-                                            password = f"{password}|{str(pwdstr).replace('Password:', '').replace(' ', '')}"
+                                            password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('Password:', '').replace(' ', '')
                                 except:
                                     continue
                         except:
@@ -344,47 +348,60 @@ class BotScannerToolWindow(object):
         #     self.success.setText(f"<p><span style=\" color:#00aa00;\">Success: {self.indexsuccess}</span></p>")
         # else:
         #     self.error.setText(f"<p><span style=\" color:#ff0000;\">Error: {self.indexerror}</span></p>")
-        self.ShowTable(row, 3, True)
+        self.ShowTable(row, 3, str(check))
         self.ShowTable(row, 4, status)
         self.runCount -= 1
-        self.StartReg()
+        self.runJob()
             
     def StartReg(self):
         if self.btn_start.text() == "Start":
+            self.threadIndex = 0
+            self.runningJob = True
             print('self.index', self.index)
+            self.runJob()
+        else:
+            for thread in self.listthread: thread.Stop()
+            self.btn_start.setText('Start')
+
+    def ActionStop(self):
+        self.runningJob = False
+    def runJob(self):
+        if self.runningJob == True:
             if self.list_wallets is None or len(self.list_wallets) == 0:
                 self.Mesagebox(text="Không có dữ liệu để thực hiện !")
                 return
-            if len(self.list_wallets) > self.index:
+            if len(self.list_wallets) > self.threadIndex:
+                index = 0
                 for vm in self.list_wallets:
-                    print(vm["path"], vm["wallet"])
-                    if self.runCount < int(self.thread_input.text())  and len(self.list_wallets) > self.index and vm["wallet"] == "MetaMask":
-                        wallet = self.list_wallets[self.index]
-                        self.threadreg = StartQ(self, self.index, wallet)
+                    index += 1
+                    if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "MetaMask":
+                        print(vm["wallet"], index, self.threadIndex)
+                        wallet = self.list_wallets[index - 1]
+                        threadRun = self.runCount % int(self.thread_input.text())
+                        if threadRun == 0:
+                            threadRun = int(self.thread_input.text())
+                        self.threadreg = StartQ(self, index - 1, threadRun, wallet)
                         self.threadreg.show.connect(self.ShowTable)
                         self.threadreg.checksuccess.connect(self.ChangeTextSuccessAndError)
                         self.listthread.append(self.threadreg)
                         self.threadreg.start()
                         self.runCount += 1
+                        self.threadIndex += 1
                         time.sleep(1)
-                    self.index += 1
-        else:
-            for thread in self.listthread: thread.Stop()
-            self.btn_start.setText('Start')
-
 
 class StartQ(QtCore.QThread):
     delete = QtCore.pyqtSignal()
     show = QtCore.pyqtSignal(int, int, str)
     checksuccess = QtCore.pyqtSignal(bool, int, str)
-    def __init__(self, ref, index, wallet) -> None:
+    def __init__(self, ref, index, threadCount, wallet) -> None:
         super().__init__()
         self.ref = ref
         self.index = index
+        self.threadCount = threadCount
         self.wallet = wallet
 
     def run(self):
-        self.reg = ScannerWalletSelenium(self.index, self.wallet)
+        self.reg = ScannerWalletSelenium(self.index, self.threadCount, self.wallet)
         self.reg.ref = self
         self.reg.run()
         time.sleep(0.2)

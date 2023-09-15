@@ -58,9 +58,6 @@ async def listenTelegram(event_bus):
 
     # await client.run_until_disconnected()
 
-def runListenTelegram(event_bus):
-    asyncio.run(listenTelegram(event_bus))
-
 async def main():
     os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--enable-logging --log-level=3"
     app = QtWidgets.QApplication(sys.argv)
