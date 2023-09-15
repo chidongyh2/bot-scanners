@@ -16,7 +16,7 @@ class ScannerWalletSelenium:
         self.index = index
         self.threadCount = threadCount
         self.wallet = wallet
-
+        self.passwordSuccess = None
         
     def login(self):
         try:
@@ -27,6 +27,7 @@ class ScannerWalletSelenium:
                     if self.wallet["password"]:
                         for password in str(self.wallet["password"]).split("|"):
                             print('dzo ', password)
+                            self.passwordSuccess = password
                             passElm = self.driver.find_element("id", "password")
                             passElm.send_keys(Keys.CONTROL + "a")
                             passElm.send_keys(Keys.DELETE)
@@ -39,6 +40,7 @@ class ScannerWalletSelenium:
                                     #login thất bại tiếp tục login
                                     continue
                             except:
+                                self.passwordSuccess = password
                                 #login Thành công
                                 return True
                         try:
@@ -119,6 +121,7 @@ class ScannerWalletSelenium:
         self.initChrome()
         checkLogin = self.login() 
         if checkLogin == True:
+            open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
             time.sleep(100)
             self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
