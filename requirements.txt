@@ -9,3 +9,7 @@ colored
 dload
 Telethon
 arrow
+pyautogui
+opencv-python
+numpy
+pytesseract
