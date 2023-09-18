@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtWidgets
+from CookieScannerSelenium import CookieScannerSelenium
 from ScannerWalletSelenium import ScannerWalletSelenium
 import os, time
 import pathlib
@@ -239,38 +240,48 @@ class BotScannerToolWindow(object):
         self.indexerror = 0
         self.listthread = []
         self.listAccountRunning = []
-        self.list_hostmail = []
+        self.list_cookies = []
         self.list_wallets = []
         self.runCount = 0
         self.index = 0
         self.threadIndex = 0
         self.runningJob = True
+        self.run_option = 0
         self.btn_start.clicked.connect(self.StartReg)
         self.btn_pause.clicked.connect(self.ActionStop)
         self.btn_start_2.clicked.connect(self.CheckFolder)
         self.btn_LD_link.clicked.connect(self.FileDialogLD)
+        self.tab_cookies.currentChanged.connect(self.changeOptionsTab)
 
+    def changeOptionsTab(self, index):
+        print(index)
+        self.run_option = index
+                
     def CheckFolder(self):
         if len(self.LD_link.text()) == 0 or not os.path.exists(self.LD_link.text()):
            self.Mesagebox(text="Chọn folder !")
            return
         self.list_wallets = []
         rootPath = pathlib.Path(self.LD_link.text())
-        self.recursiveDir(rootPath)
-        self.table_wallets.setRowCount(0)
-        i = 0
-        if len(self.list_wallets) > 0:
-            for account in self.list_wallets:
-                self.table_wallets.insertRow(i)
-                self.ShowTable(i, 0, account["path"])
-                self.ShowTable(i, 1, account["wallet"])
-                self.ShowTable(i, 2, account["password"])
-                self.ShowTable(i, 3, account["live"])
-                self.ShowTable(i, 4, account["status"])
-                i += 1 
+        if self.run_option == 0: #load wallets
+            self.recursiveDir(rootPath)
+            self.table_wallets.setRowCount(0)
+            i = 0
+            if len(self.list_wallets) > 0:
+                for account in self.list_wallets:
+                    self.table_wallets.insertRow(i)
+                    self.ShowTable(i, 0, account["path"])
+                    self.ShowTable(i, 1, account["wallet"])
+                    self.ShowTable(i, 2, account["password"])
+                    self.ShowTable(i, 3, account["live"])
+                    self.ShowTable(i, 4, account["status"])
+                    i += 1 
+            else:
+                self.Mesagebox(text="Không tìm thấy dữ liệu")
         else:
-            self.Mesagebox(text="Không tìm thấy dữ liệu")
-
+            #load cookies
+            self.recursiveDirCookie(rootPath)
+            
     def recursiveDir(self, path: pathlib.Path, passwordRoot = None):
         password = None
         for item in path.iterdir():
@@ -303,6 +314,34 @@ class BotScannerToolWindow(object):
                            "password": passwordRoot, "live": None, "status": None}
                     self.list_wallets.append(obj)
 
+    def recursiveDirCookie(self, path: pathlib.Path, passwordRoot = None):
+        password = None
+        for item in path.iterdir():
+            if passwordRoot is None and item.is_file() and "password" in str(item).lower():
+                if os.path.exists(item):
+                    passwordReadFile = open(f"{item}", 'rb')
+                    if passwordReadFile:
+                        try:
+                            list_password = passwordReadFile.read().splitlines()
+                            for pwdstr in list_password:
+                                try:
+                                    if pwdstr is not None and len(str(pwdstr)) > 0 and 'Password:' in str(pwdstr):
+                                        if password is None or len(password) == 0:
+                                            password = str(pwdstr).replace("b'", "").replace("'", "").replace("Password:", "").replace(" ", "")
+                                        else:
+                                            password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('Password:', '').replace(' ', '')
+                                except:
+                                    continue
+                        except:
+                            continue
+            if item.is_dir() and "cookies" in str(item).lower():
+                self.recursiveDir(item, password if password is not None else passwordRoot)
+            
+            if item.is_file() and "chrome" in str(item).lower():
+                obj = { "path": str(item), "facebook": False, "instagram": False, "amazone": False,  "twitter": False}
+                self.list_cookies.append(obj)
+                    
+                    
     def FileDialogLD(self):
         self.filepath2 = QtWidgets.QFileDialog()
         self.filepath2.setFileMode(QtWidgets.QFileDialog.Directory)
@@ -365,30 +404,56 @@ class BotScannerToolWindow(object):
 
     def ActionStop(self):
         self.runningJob = False
+        
     def runJob(self):
         if self.runningJob == True:
-            if self.list_wallets is None or len(self.list_wallets) == 0:
-                self.Mesagebox(text="Không có dữ liệu để thực hiện !")
-                return
-            if len(self.list_wallets) > self.threadIndex:
-                index = 0
-                for vm in self.list_wallets:
-                    index += 1
-                    if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "MetaMask":
-                        print(vm["wallet"], index, self.threadIndex)
-                        wallet = self.list_wallets[index - 1]
-                        threadRun = self.runCount % int(self.thread_input.text())
-                        if threadRun == 0:
-                            threadRun = int(self.thread_input.text())
-                        self.threadreg = StartQ(self, index - 1, threadRun, wallet)
-                        self.threadreg.show.connect(self.ShowTable)
-                        self.threadreg.checksuccess.connect(self.ChangeTextSuccessAndError)
-                        self.listthread.append(self.threadreg)
-                        self.threadreg.start()
-                        self.runCount += 1
-                        self.threadIndex += 1
-                        time.sleep(1)
-
+            #for wallet
+            if self.run_option == 0:
+                if self.list_wallets is None or len(self.list_wallets) == 0:
+                    self.Mesagebox(text="Không có dữ liệu để thực hiện !")
+                    return
+                if len(self.list_wallets) > self.threadIndex:
+                    index = 0
+                    for vm in self.list_wallets:
+                        index += 1
+                        if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "MetaMask":
+                            print(vm["wallet"], index, self.threadIndex)
+                            wallet = self.list_wallets[index - 1]
+                            threadRun = self.runCount % int(self.thread_input.text())
+                            if threadRun == 0:
+                                threadRun = int(self.thread_input.text())
+                            self.threadreg = StartQ(self, index - 1, threadRun, wallet)
+                            self.threadreg.show.connect(self.ShowTable)
+                            self.threadreg.checksuccess.connect(self.ChangeTextSuccessAndError)
+                            self.listthread.append(self.threadreg)
+                            self.threadreg.start()
+                            self.runCount += 1
+                            self.threadIndex += 1
+                            time.sleep(1)
+            #for cookies
+            else:
+                if self.list_cookies is None or len(self.list_cookies) == 0:
+                    self.Mesagebox(text="Không có dữ liệu để thực hiện !")
+                    return
+                if len(self.list_cookies) > self.threadIndex:
+                    index = 0
+                    for vm in self.list_cookies:
+                        index += 1
+                        if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "MetaMask":
+                            print(vm["wallet"], index, self.threadIndex)
+                            wallet = self.list_cookies[index - 1]
+                            threadRun = self.runCount % int(self.thread_input.text())
+                            if threadRun == 0:
+                                threadRun = int(self.thread_input.text())
+                            self.threadreg = StartQ(self, index - 1, threadRun, wallet)
+                            self.threadreg.show.connect(self.ShowTable)
+                            self.threadreg.checksuccess.connect(self.ChangeTextSuccessAndError)
+                            self.listthread.append(self.threadreg)
+                            self.threadreg.start()
+                            self.runCount += 1
+                            self.threadIndex += 1
+                            time.sleep(1)
+                            
 class StartQ(QtCore.QThread):
     delete = QtCore.pyqtSignal()
     show = QtCore.pyqtSignal(int, int, str)
@@ -402,6 +467,23 @@ class StartQ(QtCore.QThread):
 
     def run(self):
         self.reg = ScannerWalletSelenium(self.index, self.threadCount, self.wallet)
+        self.reg.ref = self
+        self.reg.run()
+        time.sleep(0.2)
+
+class StartQCookies(QtCore.QThread):
+    delete = QtCore.pyqtSignal()
+    show = QtCore.pyqtSignal(int, int, str)
+    checksuccess = QtCore.pyqtSignal(bool, int, str)
+    def __init__(self, ref, index, threadCount, wallet) -> None:
+        super().__init__()
+        self.ref = ref
+        self.index = index
+        self.threadCount = threadCount
+        self.wallet = wallet
+
+    def run(self):
+        self.reg = CookieScannerSelenium(self.index, self.threadCount, self.wallet)
         self.reg.ref = self
         self.reg.run()
         time.sleep(0.2)

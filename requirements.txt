@@ -7,3 +7,5 @@ selenium
 undetected-chromedriver
 colored
 dload
+Telethon
+arrow
