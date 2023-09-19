@@ -443,7 +443,8 @@ class BotScannerToolWindow(object):
                     index = 0
                     for vm in self.list_wallets:
                         index += 1
-                        if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and vm["wallet"] == "Exodus":
+                        passWallet = (vm["wallet"] == "Exodus" and self.cb_exodus.isChecked()) or (vm["wallet"] == "MetaMask" and self.cb_metamask.isChecked()) 
+                        if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and passWallet == True:
                             print(vm["wallet"], index, self.threadIndex)
                             wallet = self.list_wallets[index - 1]
                             threadRun = self.runCount % int(self.thread_input.text())
