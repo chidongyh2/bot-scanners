@@ -2,9 +2,6 @@
 # import undetected_chromedriver as uc
 import time
 from selenium import webdriver
-import pickle
-from urllib.request import urlopen
-from colored import fg, bg, attr  # pip install colored
 import os, shutil
 from selenium.webdriver.common.keys import Keys
 

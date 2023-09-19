@@ -3,9 +3,6 @@
 import subprocess
 import time
 from selenium import webdriver
-import pickle
-from urllib.request import urlopen
-from colored import fg, bg, attr  # pip install colored
 import os, shutil
 from selenium.webdriver.common.keys import Keys
 import pyautogui
@@ -122,35 +119,51 @@ class ScannerWalletSelenium:
         self.driver.delete_all_cookies()
 
     def initEdoxus(self):
+        if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus"):
+            return False
+        if not os.path.exists(rf"{self.wallet['path']}\exodus.wallet"):
+            return False
+        self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
+        os.rmdir(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
+        self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus")
+        time.sleep(2)
         subprocess.call([rf'C:\Users\quy.ngovan\AppData\Local\exodus\Exodus.exe'])
-        time.sleep(8)
-        pyautogui.write('Hello There')
-        time.sleep(0.1)
-        pyautogui.press('enter')
-        # screenshot
-        image = pyautogui.screenshot(region=(30,30, 1920, 980))
-        # convert it to numpy array and BGR 
-        # so we can write it to the disk
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        # writing it to the disk using opencv
-        cv2.imwrite("image-temp/master-screen.png", image)
-        time.sleep(1)
-        pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
-        firstStepText = pytesseract.image_to_string("image-temp/master-screen.png")
-        # check is New Update Avaliable !
-        if 'New Update Available!' in firstStepText:
-            print(pyautogui.position())
-            pyautogui.moveTo(1850, 65)
-            pyautogui.click(1850, 65)
-
-        # move to input pasword
-        time.sleep(0.5)
-        pyautogui.moveTo(960, 410)
-        pyautogui.click(960, 410)
-
-        # move to next button
         time.sleep(5)
-        pyautogui.moveTo(960, 500)
+        # pyautogui.write('Hello There')
+        # pyautogui.press('enter')
+        #screenshot check cookies pass
+        screenshot_login = pyautogui.screenshot(region=(560, 220, 800, 590))
+        screenshot_login = cv2.cvtColor(np.array(screenshot_login), cv2.COLOR_RGB2BGR)
+        cv2.imwrite("image-temp/screen-login.png", screenshot_login)
+        time.sleep(2)
+        pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        firstStepText = pytesseract.image_to_string("image-temp/screen-login.png")
+        if 'Unlock to Continue' in firstStepText:
+            if self.wallet["password"]:
+                for password in str(self.wallet["password"]).split("|"):
+                    print('password', password)
+                    pyautogui.write(password)
+                    pyautogui.press('enter')
+                    time.sleep(4)
+                    check_login = pyautogui.screenshot(region=(560, 220, 800, 590))
+                    check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
+                    cv2.imwrite("image-temp/screen-login-check.png", check_login)
+                    loginCheckScreen = pytesseract.image_to_string("image-temp/screen-login-check.png")
+                    if 'Unlock to Continue' not in loginCheckScreen:
+                        time.sleep(30)
+                        os.system('tskill Exodus')
+                        self.passwordSuccess = password
+                        return True
+                    else:
+                        continue
+                return False
+            else:
+                os.system('tskill Exodus')
+                return False
+        else:
+            os.system('tskill Exodus')
+            return False
+
 
     def run(self):
         if self.wallet["wallet"] == "MetaMask":
@@ -166,8 +179,7 @@ class ScannerWalletSelenium:
                 self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
             self.driver.quit()
         if self.wallet["wallet"] == "Exodus":
-            self.initEdoxus()
-            checkLogin = None 
+            checkLogin = self.initEdoxus()
             if checkLogin == True:
                 open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
                 time.sleep(30)

