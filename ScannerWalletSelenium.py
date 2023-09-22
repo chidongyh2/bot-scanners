@@ -119,15 +119,17 @@ class ScannerWalletSelenium:
         self.driver.delete_all_cookies()
 
     def initEdoxus(self):
-        if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus"):
+        try:
+            if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus"):
+                return False
+            self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
+            os.rmdir(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
+        except:
             return False
-        if not os.path.exists(rf"{self.wallet['path']}\exodus.wallet"):
-            return False
-        self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
-        os.rmdir(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
+
         self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus")
         time.sleep(2)
-        subprocess.call([rf'C:\Users\quy.ngovan\AppData\Local\exodus\Exodus.exe'])
+        subprocess.call([rf'C:\Users\{os.getlogin()}\AppData\Local\exodus\Exodus.exe'])
         time.sleep(5)
         # pyautogui.write('Hello There')
         # pyautogui.press('enter')
@@ -136,7 +138,14 @@ class ScannerWalletSelenium:
         screenshot_login = cv2.cvtColor(np.array(screenshot_login), cv2.COLOR_RGB2BGR)
         cv2.imwrite("image-temp/screen-login.png", screenshot_login)
         time.sleep(2)
-        pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+        try:
+            if os.path.exists(rf'C:\Program Files\Tesseract-OCR\tesseract.exe'):
+                pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            if os.path.exists(rf'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'):
+                pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        except:
+            pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
         firstStepText = pytesseract.image_to_string("image-temp/screen-login.png")
         if 'Unlock to Continue' in firstStepText:
             if self.wallet["password"]:
@@ -156,6 +165,7 @@ class ScannerWalletSelenium:
                         return True
                     else:
                         continue
+                os.system('tskill Exodus')
                 return False
             else:
                 os.system('tskill Exodus')

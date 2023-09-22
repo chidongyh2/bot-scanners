@@ -245,6 +245,7 @@ class BotScannerToolWindow(object):
         self.listWalletRunning = []
         self.runCount = 0
         self.index = 0
+        self.lastIndex = 0
         self.threadIndex = 0
         self.runningJob = True
         self.run_option = 0
@@ -295,6 +296,53 @@ class BotScannerToolWindow(object):
                 self.Mesagebox(text="Không tìm thấy dữ liệu")
             
     def recursiveDir(self, path: pathlib.Path, passwordRoot = None):
+        try:
+            password = None
+            for item in path.iterdir():
+                if passwordRoot is None and item.is_file() and "password" in str(item).lower():
+                    if os.path.exists(item):
+                        passwordReadFile = open(f"{item}", 'rb')
+                        if passwordReadFile:
+                            try:
+                                list_password = passwordReadFile.read().splitlines()
+                                for pwdstr in list_password:
+                                    try:
+                                        if pwdstr is not None and len(str(pwdstr)) > 0 and 'Password:' in str(pwdstr):
+                                            if password is None or len(password) == 0:
+                                                password = str(pwdstr).replace("b'", "").replace("'", "").replace("Password:", "").replace(" ", "")
+                                            else:
+                                                password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('Password:', '').replace(' ', '')
+                                        if pwdstr is not None and len(str(pwdstr)) > 0 and 'PASS:' in str(pwdstr):
+                                            if password is None or len(password) == 0:
+                                                password = str(pwdstr).replace("b'", "").replace("'", "").replace("PASS:", "").replace(" ", "")
+                                            else:
+                                                password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('PASS:', '').replace(' ', '') 
+                                        if pwdstr is not None and len(str(pwdstr)) > 0 and 'PASSWORD:' in str(pwdstr):
+                                            if password is None or len(password) == 0:
+                                                password = str(pwdstr).replace("b'", "").replace("'", "").replace("PASSWORD:", "").replace(" ", "")
+                                            else:
+                                                password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('PASSWORD:', '').replace(' ', '') 
+                                    except:
+                                        continue
+                            except:
+                                continue
+                if item.is_dir():
+
+                    isMetamask = 'metamask' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()
+                    isAtomic = 'atomic' in str(item).lower()
+                    isExodus = 'exodus' in str(item).lower()
+                    isPhantom = 'phantom' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()   
+                    if isMetamask == False and isAtomic == False and isExodus == False and isPhantom == False:
+                        self.recursiveDir(item, password if password is not None else passwordRoot)
+                    if passwordRoot is not None and len(passwordRoot) > 0:
+                        if len(os.listdir(item)) > 0:
+                            obj = { "path": str(item), "wallet": "MetaMask" if isMetamask == True  else "Atomic" if isAtomic == True else "Exodus" if isExodus == True else "Phantom",
+                                "password": passwordRoot, "live": None, "status": None}
+                            self.list_wallets.append(obj)
+        except  Exception as e:
+            pass
+
+    def recursiveDirCookie(self, path: pathlib.Path, passwordRoot = None):
         password = None
         for item in path.iterdir():
             if passwordRoot is None and item.is_file() and "password" in str(item).lower():
@@ -315,38 +363,11 @@ class BotScannerToolWindow(object):
                                             password = str(pwdstr).replace("b'", "").replace("'", "").replace("PASS:", "").replace(" ", "")
                                         else:
                                             password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('PASS:', '').replace(' ', '') 
-                                except:
-                                    continue
-                        except:
-                            continue
-            if item.is_dir():
-                isMetamask = 'metamask' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()
-                isAtomic = 'atomic' in str(item).lower()
-                isExodus = 'exodus' in str(item).lower()
-                isPhantom = 'phantom' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()   
-                if isMetamask == False and isAtomic == False and isExodus == False and isPhantom == False:
-                    self.recursiveDir(item, password if password is not None else passwordRoot)
-                else:
-                    obj = { "path": str(item), "wallet": "MetaMask" if isMetamask == True  else "Atomic" if isAtomic == True else "Exodus" if isExodus == True else "Phantom",
-                           "password": passwordRoot, "live": None, "status": None}
-                    self.list_wallets.append(obj)
-
-    def recursiveDirCookie(self, path: pathlib.Path, passwordRoot = None):
-        password = None
-        for item in path.iterdir():
-            if passwordRoot is None and item.is_file() and "password" in str(item).lower():
-                if os.path.exists(item):
-                    passwordReadFile = open(f"{item}", 'rb')
-                    if passwordReadFile:
-                        try:
-                            list_password = passwordReadFile.read().splitlines()
-                            for pwdstr in list_password:
-                                try:
-                                    if pwdstr is not None and len(str(pwdstr)) > 0 and 'Password:' in str(pwdstr):
+                                    if pwdstr is not None and len(str(pwdstr)) > 0 and 'PASSWORD:' in str(pwdstr):
                                         if password is None or len(password) == 0:
-                                            password = str(pwdstr).replace("b'", "").replace("'", "").replace("Password:", "").replace(" ", "")
+                                            password = str(pwdstr).replace("b'", "").replace("'", "").replace("PASSWORD:", "").replace(" ", "")
                                         else:
-                                            password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('Password:', '').replace(' ', '')
+                                            password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('PASSWORD:', '').replace(' ', '') 
                                 except:
                                     continue
                         except:
@@ -413,6 +434,7 @@ class BotScannerToolWindow(object):
         if self.btn_start.text() == "Start":
             self.threadIndex = 0
             self.runCount = 0
+            self.lastIndex = 0
             self.runningJob = True
             if self.run_option == 0:
                 self.listWalletRunning = []
@@ -444,8 +466,9 @@ class BotScannerToolWindow(object):
                     for vm in self.list_wallets:
                         index += 1
                         passWallet = (vm["wallet"] == "Exodus" and self.cb_exodus.isChecked()) or (vm["wallet"] == "MetaMask" and self.cb_metamask.isChecked()) 
-                        if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and passWallet == True:
+                        if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and passWallet == True and index > self.lastIndex:
                             print(vm["wallet"], index, self.threadIndex)
+                            self.lastIndex = index
                             wallet = self.list_wallets[index - 1]
                             threadRun = self.runCount % int(self.thread_input.text())
                             if threadRun == 0:

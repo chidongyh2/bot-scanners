@@ -17,8 +17,8 @@ api_hash = '7b915080f6c41357c2ad84ca6e84614a'
 chanelId = -1001192416115
 chanelName = 'PancakeswapLiquidity'
 limit = 200
-open("token.txt", "w").close()
-client = TelegramClient('bot', api_id, api_hash)
+#open("token.txt", "w").close()
+#client = TelegramClient('bot', api_id, api_hash)
 # Configure the logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -59,6 +59,7 @@ async def listenTelegram(event_bus):
     # await client.run_until_disconnected()
 
 async def main():
+    #pyinstaller --noconsole --windowed --onefile .\asyncmain.py
     os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--enable-logging --log-level=3"
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
@@ -70,9 +71,10 @@ async def main():
     MainWindow.show()
     time.sleep(1)
     ui.listenEvent(event_bus)
-    sys.exit(app.exec_(), client.disconnect())
+    #sys.exit(app.exec_(), client.disconnect())
+    sys.exit(app.exec_())
 
 asyncio.run(main())
 
-with client:
-    client.run_until_disconnected()
+# with client:
+#     client.run_until_disconnected()
