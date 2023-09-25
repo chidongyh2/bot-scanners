@@ -327,7 +327,6 @@ class BotScannerToolWindow(object):
                             except:
                                 continue
                 if item.is_dir():
-
                     isMetamask = 'metamask' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()
                     isAtomic = 'atomic' in str(item).lower()
                     isExodus = 'exodus' in str(item).lower()
@@ -335,7 +334,7 @@ class BotScannerToolWindow(object):
                     if isMetamask == False and isAtomic == False and isExodus == False and isPhantom == False:
                         self.recursiveDir(item, password if password is not None else passwordRoot)
                     if passwordRoot is not None and len(passwordRoot) > 0:
-                        if len(os.listdir(item)) > 0:
+                        if len(os.listdir(item)) > 0 and (isMetamask == True or isAtomic == True or isExodus == True or isPhantom == True):
                             obj = { "path": str(item), "wallet": "MetaMask" if isMetamask == True  else "Atomic" if isAtomic == True else "Exodus" if isExodus == True else "Phantom",
                                 "password": passwordRoot, "live": None, "status": None}
                             self.list_wallets.append(obj)
@@ -438,18 +437,15 @@ class BotScannerToolWindow(object):
             self.runningJob = True
             if self.run_option == 0:
                 self.listWalletRunning = []
-                if self.cb_exodus.isChecked():
-                    for wallet in self.list_wallets: 
-                        if wallet["wallet"] == "Exodus":
-                            self.listWalletRunning.append(wallet) 
-                if self.cb_metamask.isChecked():
-                    for wallet in self.list_wallets: 
-                        if wallet["wallet"] == "MetaMask":
-                            self.listWalletRunning.append(wallet) 
-                if self.cb_atomic.isChecked():
-                    for wallet in self.list_wallets: 
-                        if wallet["wallet"] == "Atomic":
-                            self.listWalletRunning.append(wallet) 
+                for wallet in self.list_wallets: 
+                    if wallet["wallet"] == "Exodus" and self.cb_exodus.isChecked():
+                        self.listWalletRunning.append(wallet) 
+                    if wallet["wallet"] == "MetaMask" and self.cb_metamask.isChecked():
+                        self.listWalletRunning.append(wallet) 
+                    if wallet["wallet"] == "Atomic" and self.cb_atomic.isChecked():
+                        self.listWalletRunning.append(wallet) 
+                    if wallet["wallet"] == "Phantom" and self.cb_phantom.isChecked():
+                        self.listWalletRunning.append(wallet) 
             self.runJob()
         else:
             for thread in self.listthread: thread.Stop()
@@ -469,7 +465,7 @@ class BotScannerToolWindow(object):
                     index = 0
                     for vm in self.list_wallets:
                         index += 1
-                        passWallet = (vm["wallet"] == "Atomic" and self.cb_atomic.isChecked()) or (vm["wallet"] == "Exodus" and self.cb_exodus.isChecked()) or (vm["wallet"] == "MetaMask" and self.cb_metamask.isChecked()) 
+                        passWallet = (vm["wallet"] == "Phantom" and self.cb_phantom.isChecked()) or (vm["wallet"] == "Atomic" and self.cb_atomic.isChecked()) or (vm["wallet"] == "Exodus" and self.cb_exodus.isChecked()) or (vm["wallet"] == "MetaMask" and self.cb_metamask.isChecked()) 
                         if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and passWallet == True and index > self.lastIndex:
                             print(vm["wallet"], index, self.threadIndex)
                             self.lastIndex = index

