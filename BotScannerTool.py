@@ -446,6 +446,10 @@ class BotScannerToolWindow(object):
                     for wallet in self.list_wallets: 
                         if wallet["wallet"] == "MetaMask":
                             self.listWalletRunning.append(wallet) 
+                if self.cb_atomic.isChecked():
+                    for wallet in self.list_wallets: 
+                        if wallet["wallet"] == "Atomic":
+                            self.listWalletRunning.append(wallet) 
             self.runJob()
         else:
             for thread in self.listthread: thread.Stop()
@@ -465,7 +469,7 @@ class BotScannerToolWindow(object):
                     index = 0
                     for vm in self.list_wallets:
                         index += 1
-                        passWallet = (vm["wallet"] == "Exodus" and self.cb_exodus.isChecked()) or (vm["wallet"] == "MetaMask" and self.cb_metamask.isChecked()) 
+                        passWallet = (vm["wallet"] == "Atomic" and self.cb_atomic.isChecked()) or (vm["wallet"] == "Exodus" and self.cb_exodus.isChecked()) or (vm["wallet"] == "MetaMask" and self.cb_metamask.isChecked()) 
                         if self.runCount < int(self.thread_input.text()) and index > self.threadIndex and passWallet == True and index > self.lastIndex:
                             print(vm["wallet"], index, self.threadIndex)
                             self.lastIndex = index

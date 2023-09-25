@@ -174,6 +174,62 @@ class ScannerWalletSelenium:
             os.system('tskill Exodus')
             return False
 
+    def initAtomic(self):
+        try:
+            if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic"):
+                return False
+            self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic")
+        except:
+            return False
+
+        self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic")
+        time.sleep(2)
+        subprocess.call([rf'C:\Users\{os.getlogin()}\AppData\Local\Programs\atomic\Atomic Wallet.exe'])
+        time.sleep(5)
+        # pyautogui.write('Hello There')
+        # pyautogui.press('enter')
+        #screenshot check cookies pass
+        screenshot_login = pyautogui.screenshot(region=(560, 220, 800, 590))
+        screenshot_login = cv2.cvtColor(np.array(screenshot_login), cv2.COLOR_RGB2BGR)
+        cv2.imwrite("image-temp/screen-login.png", screenshot_login)
+        time.sleep(2)
+
+        try:
+            if os.path.exists(rf'C:\Program Files\Tesseract-OCR\tesseract.exe'):
+                pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            if os.path.exists(rf'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'):
+                pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        except:
+            pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
+        firstStepText = pytesseract.image_to_string("image-temp/screen-login.png")
+        print('firstStepText', firstStepText)
+        if 'Password' in firstStepText:
+            if self.wallet["password"]:
+                for password in str(self.wallet["password"]).split("|"):
+                    print('password', password)
+                    pyautogui.write(password)
+                    pyautogui.click(x=856, y=553)
+                    time.sleep(4)
+                    X = 856 
+                    check_login = pyautogui.screenshot(region=(560, 220, 800, 590))
+                    check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
+                    cv2.imwrite("image-temp/screen-login-check.png", check_login)
+                    loginCheckScreen = pytesseract.image_to_string("image-temp/screen-login-check.png")
+                    if 'Unlock to Continue' not in loginCheckScreen:
+                        time.sleep(30)
+                        os.system('tskill Atomic Wallet')
+                        self.passwordSuccess = password
+                        return True
+                    else:
+                        continue
+                os.system('tskill Atomic Wallet')
+                return False
+            else:
+                os.system('tskill Atomic Wallet')
+                return False
+        else:
+            os.system('tskill Atomic Wallet')
+            return False
 
     def run(self):
         if self.wallet["wallet"] == "MetaMask":
@@ -199,6 +255,19 @@ class ScannerWalletSelenium:
                 time.sleep(3)
                 self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
                 
+        if self.wallet["wallet"] == "Atomic":
+            checkLogin = self.initAtomic()
+            print('checkLogin', checkLogin)
+            time.sleep(50)
+            if checkLogin == True:
+                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
+                time.sleep(30)
+                self.ref.checksuccess.emit(True, self.index, "Login thành công")
+
+            if checkLogin == False:
+                time.sleep(3)
+                self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
+                        
         if self.wallet["wallet"] == "Phantom":
             self.initChromeMetaMask()
             checkLogin = self.login() 
