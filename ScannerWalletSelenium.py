@@ -9,6 +9,7 @@ import pyautogui
 import numpy as np
 import cv2
 import pytesseract
+import threading
 class ScannerWalletSelenium:
     ref = None
     driver = None
@@ -72,7 +73,7 @@ class ScannerWalletSelenium:
         try:
             with os.scandir(directory_path) as entries:
                 for entry in entries:
-                    if entry.is_file(): 
+                    if entry.is_file() and 'window-state' not in str(entry): 
                         os.unlink(entry.path)
                     else:
                         shutil.rmtree(entry.path)
@@ -87,7 +88,8 @@ class ScannerWalletSelenium:
             if os.path.isdir(s):
                 shutil.copytree(s, d, symlinks, ignore)
             else:
-                shutil.copy2(s, d)
+                if 'window-state' not in str(s):
+                  shutil.copy2(s, d)
 
     def initChromeMetaMask(self):
         profileIndex = self.threadCount
@@ -153,7 +155,7 @@ class ScannerWalletSelenium:
                     print('password', password)
                     pyautogui.write(password)
                     pyautogui.press('enter')
-                    time.sleep(4)
+                    time.sleep(5)
                     check_login = pyautogui.screenshot(region=(560, 220, 800, 590))
                     check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
                     cv2.imwrite("image-temp/screen-login-check.png", check_login)
@@ -184,8 +186,8 @@ class ScannerWalletSelenium:
 
         self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic")
         time.sleep(2)
-        subprocess.call([rf'C:\Users\{os.getlogin()}\AppData\Local\Programs\atomic\Atomic Wallet.exe'])
-        time.sleep(5)
+        os.startfile(rf'C:\Users\{os.getlogin()}\AppData\Local\Programs\atomic\Atomic Wallet.exe')
+        time.sleep(10)
         # pyautogui.write('Hello There')
         # pyautogui.press('enter')
         #screenshot check cookies pass
@@ -193,7 +195,6 @@ class ScannerWalletSelenium:
         screenshot_login = cv2.cvtColor(np.array(screenshot_login), cv2.COLOR_RGB2BGR)
         cv2.imwrite("image-temp/screen-login.png", screenshot_login)
         time.sleep(2)
-
         try:
             if os.path.exists(rf'C:\Program Files\Tesseract-OCR\tesseract.exe'):
                 pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -203,32 +204,48 @@ class ScannerWalletSelenium:
             pytesseract.pytesseract.tesseract_cmd = rf'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
         firstStepText = pytesseract.image_to_string("image-temp/screen-login.png")
         print('firstStepText', firstStepText)
-        if 'Password' in firstStepText:
+        if 'RESTORE FROM BACKUP' in firstStepText:
             if self.wallet["password"]:
                 for password in str(self.wallet["password"]).split("|"):
+                    pyautogui.doubleClick(x=904, y=401)
+                    pyautogui.typewrite("") 
+                    pyautogui.press('backspace')
                     print('password', password)
                     pyautogui.write(password)
-                    pyautogui.click(x=856, y=553)
-                    time.sleep(4)
-                    X = 856 
+                    pyautogui.click(x=970, y=522)
+                    time.sleep(5)
                     check_login = pyautogui.screenshot(region=(560, 220, 800, 590))
                     check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
                     cv2.imwrite("image-temp/screen-login-check.png", check_login)
                     loginCheckScreen = pytesseract.image_to_string("image-temp/screen-login-check.png")
-                    if 'Unlock to Continue' not in loginCheckScreen:
+                    if 'RESTORE FROM BACKUP' not in loginCheckScreen:
                         time.sleep(30)
-                        os.system('tskill Atomic Wallet')
+                        # check if need update
+                        check_update = pyautogui.screenshot(region=(560, 220, 800, 590))
+                        check_update = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
+                        cv2.imwrite("image-temp/screen-login-check.png", check_login)
+                        updateCheckText = pytesseract.image_to_string("image-temp/screen-login-check.png")
+                        pyautogui.click(x=980, y=970)
+
+                        #balance 
+                        check_login = pyautogui.screenshot(region=(0, 145, 250, 285))
+                        check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
+                        cv2.imwrite("image-temp/balance.png", check_login)
+                        loginCheckScreen = pytesseract.image_to_string("image-temp/balance.png")
+                        balanceText = pytesseract.image_to_string("image-temp/balance.png")
+                        print('balanceText', balanceText)
+                        os.system('tskill "Atomic Wallet"')
                         self.passwordSuccess = password
                         return True
                     else:
                         continue
-                os.system('tskill Atomic Wallet')
+                os.system('tskill "Atomic Wallet"')
                 return False
             else:
-                os.system('tskill Atomic Wallet')
+                os.system('tskill "Atomic Wallet"')
                 return False
         else:
-            os.system('tskill Atomic Wallet')
+            os.system('tskill "Atomic Wallet"')
             return False
 
     def run(self):
