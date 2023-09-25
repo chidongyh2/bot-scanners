@@ -218,7 +218,10 @@ class ScannerWalletSelenium:
                     check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
                     cv2.imwrite("image-temp/screen-login-check.png", check_login)
                     loginCheckScreen = pytesseract.image_to_string("image-temp/screen-login-check.png")
-                    if 'RESTORE FROM BACKUP' not in loginCheckScreen:
+                    print('loginCheckScreen', loginCheckScreen)
+                    if 'Your 12-word backup phrase' in loginCheckScreen:
+                        break
+                    if 'RESTORE' not in loginCheckScreen:
                         time.sleep(30)
                         # check if need update
                         check_update = pyautogui.screenshot(region=(560, 220, 800, 590))
