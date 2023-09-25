@@ -331,23 +331,27 @@ class ScannerWalletSelenium:
                     if 'Your 12-word backup phrase' in loginCheckScreen:
                         break
                     if 'RESTORE' not in loginCheckScreen:
-                        time.sleep(30)
+                        time.sleep(10)
                         # check if need update
-                        check_update = pyautogui.screenshot(region=(560, 220, 800, 590))
-                        check_update = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
-                        cv2.imwrite("image-temp/screen-login-check.png", check_login)
-                        updateCheckText = pytesseract.image_to_string("image-temp/screen-login-check.png")
-                        pyautogui.click(x=980, y=970)
-
+                        try:
+                            check_update = pyautogui.screenshot(region=(560, 220, 800, 590))
+                            check_update = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
+                            cv2.imwrite("image-temp/screen-app-update.png", check_update)
+                            updateCheckText = pytesseract.image_to_string("image-temp/screen-app-update.png")
+                            print('updateCheckText', updateCheckText)
+                            pyautogui.click(x=980, y=970)
+                        except:
+                            pass
                         #balance 
-                        check_login = pyautogui.screenshot(region=(0, 145, 250, 285))
-                        check_login = cv2.cvtColor(np.array(check_login), cv2.COLOR_RGB2BGR)
-                        cv2.imwrite("image-temp/balance.png", check_login)
-                        loginCheckScreen = pytesseract.image_to_string("image-temp/balance.png")
+                        checkBlanaceImg = pyautogui.screenshot(region=(90, 145, 120, 155))
+                        checkBlanaceImg = cv2.cvtColor(np.array(checkBlanaceImg), cv2.COLOR_RGB2BGR)
+                        cv2.imwrite("image-temp/balance.png", checkBlanaceImg)
+                        time.sleep(1)
                         balanceText = pytesseract.image_to_string("image-temp/balance.png")
                         print('balanceText', balanceText)
                         os.system('tskill "Atomic Wallet"')
                         self.passwordSuccess = password
+                        self.balance = balanceText
                         return True
                     else:
                         continue
