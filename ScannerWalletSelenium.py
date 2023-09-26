@@ -266,8 +266,21 @@ class ScannerWalletSelenium:
                     cv2.imwrite("image-temp/screen-login-check.png", check_login)
                     loginCheckScreen = pytesseract.image_to_string("image-temp/screen-login-check.png")
                     if 'Unlock to Continue' not in loginCheckScreen:
+                        self.passwordSuccess = password
+                        #balance
+                        time.sleep(2) 
+                        pyautogui.moveTo(x=830, y=65)
+                        pyautogui.click(x=830, y=65)
+                        time.sleep(1)
+                        checkBlanaceImg = pyautogui.screenshot(region=(75, 40, 135, 70))
+                        checkBlanaceImg = cv2.cvtColor(np.array(checkBlanaceImg), cv2.COLOR_RGB2BGR)
+                        cv2.imwrite("image-temp/balance.png", checkBlanaceImg)
+                        time.sleep(1)
+                        balanceText = pytesseract.image_to_string("image-temp/balance.png")
+                        print('balanceText', balanceText)
                         os.system('tskill Exodus')
                         self.passwordSuccess = password
+                        self.balance = balanceText
                         return True
                     else:
                         continue

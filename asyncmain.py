@@ -38,20 +38,20 @@ async def listenTelegram(event_bus):
     try: assert await client.connect()
     except Exception as e: print(str(e))
 
-    tokenFile = open("channel.txt", 'r')
-    if tokenFile: 
-        list_channel_id = tokenFile.readlines()
-        for channel_id in list_channel_id:
-            channelIds.append(chanelId)
-            async for messageInterface in client.iter_messages(-1001593940980,limit=limit):
-                print(arrow.get(messageInterface.date), arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-5))
-                if not messageInterface.media == None:
-                    print('File Name :', str(messageInterface))
-                    path = await client.download_media(messageInterface.media, progress_callback=progress_callback)
-                    print('File saved to', path)
-                    open("sources/source.txt", 'a+').write("%s\n"%(f"E:\QUYNV\MMO\{str(messageInterface.file.name)}"))
-                    time.sleep(2)
-                    event_bus.publish("updateData")
+    # tokenFile = open("channel.txt", 'r')
+    # if tokenFile: 
+    #     list_channel_id = tokenFile.readlines()
+    #     for channel_id in list_channel_id:
+    #         channelIds.append(chanelId)
+    #         async for messageInterface in client.iter_messages(-1001593940980,limit=limit):
+    #             print(arrow.get(messageInterface.date), arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-5))
+    #             if not messageInterface.media == None:
+    #                 print('File Name :', str(messageInterface))
+    #                 path = await client.download_media(messageInterface.media, progress_callback=progress_callback)
+    #                 print('File saved to', path)
+    #                 open("sources/source.txt", 'a+').write("%s\n"%(f"E:\QUYNV\MMO\{str(messageInterface.file.name)}"))
+    #                 time.sleep(2)
+    #                 event_bus.publish("updateData")
 
         
     @client.on(events.NewMessage(chats=channelIds))
