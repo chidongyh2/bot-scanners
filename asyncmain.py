@@ -12,51 +12,65 @@ import os
 import logging
 from PyQt5 import QtCore, QtWidgets
 from EventBus import EventBus
+import datetime
 api_id = '27535321'
 api_hash = '7b915080f6c41357c2ad84ca6e84614a'
 chanelId = -1001192416115
-chanelName = 'PancakeswapLiquidity'
-limit = 200
-#open("token.txt", "w").close()
-#client = TelegramClient('bot', api_id, api_hash)
+channelIds = []
+limit = 5
+open("sources/source.txt", "w").close()
+client = TelegramClient('bot', api_id, api_hash)
 # Configure the logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 async def listenTelegram(event_bus):
-    print('dzo here')
-    # await client.start()
-    # try: assert await client.connect()
-    # except Exception as e: print(str(e))
-    # async for messageInterface in client.iter_messages('PancakeswapLiquidity', limit):
-    #     message = messageInterface.message
-    #     if " 0x" in message:
-    #         tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
-    #         amount = message[message.index("amount"):(message.index("amount") + 17)]
-    #         isSwap = False
-    #         if "Tests passed" in message:
-    #             isSwap = True
-    #         date = arrow.get(messageInterface.date).to('local').format()
-    #         open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
+    await client.start()
+    def progress_callback(current, total):
+        last_current = 0
+        last_time = 0
+        now = time.time()
+        speed = round(((current-last_current)/(now-last_time))/1000)
+        last_current = current
+        last_time = now
+        percent = int((current/total)*100)
+        logging.info('{} % .... {} KB/s'.format(percent, speed))
 
-    # time.sleep(2)
-    # event_bus.publish("updateData")
-    # @client.on(events.NewMessage(chats=[-1001192416115]))
-    # async def my_event_handler(event):
-    #     message = event.message.message
-    #     print('first', event.message.message, event.message.date)
-    #     if " 0x" in message:
-    #         tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
-    #         amount = message[message.index("amount"):(message.index("amount") + 17)]
-    #         isSwap = False
-    #         if "Tests passed" in message:
-    #             isSwap = True
-    #         date = arrow.get(event.message.date).to('local').format()
-    #         print('token from Pancake:', tokenKey.strip(), amount.strip(), isSwap)
-    #         open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
-    #         args = f"{tokenKey}|{amount}|{isSwap}|{date}"
-    #         event_bus.publish("newToken", args)
+    try: assert await client.connect()
+    except Exception as e: print(str(e))
 
-    # await client.run_until_disconnected()
+    tokenFile = open("channel.txt", 'r')
+    if tokenFile: 
+        list_channel_id = tokenFile.readlines()
+        for channel_id in list_channel_id:
+            channelIds.append(chanelId)
+            async for messageInterface in client.iter_messages(-1001593940980,limit=limit):
+                print(arrow.get(messageInterface.date), arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-5))
+                if not messageInterface.media == None:
+                    print('File Name :', str(messageInterface))
+                    path = await client.download_media(messageInterface.media, progress_callback=progress_callback)
+                    print('File saved to', path)
+                    open("sources/source.txt", 'a+').write("%s\n"%(f"E:\QUYNV\MMO\{str(messageInterface.file.name)}"))
+                    time.sleep(2)
+                    event_bus.publish("updateData")
+
+        
+    @client.on(events.NewMessage(chats=channelIds))
+    async def my_event_handler(event):
+        message = event.message.message
+        print('first', event.message.message, event.message.date)
+        if " 0x" in message:
+            tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
+            amount = message[message.index("amount"):(message.index("amount") + 17)]
+            isSwap = False
+            if "Tests passed" in message:
+                isSwap = True
+            date = arrow.get(event.message.date).to('local').format()
+            print('token from Pancake:', tokenKey.strip(), amount.strip(), isSwap)
+            open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
+            args = f"{tokenKey}|{amount}|{isSwap}|{date}"
+            event_bus.publish("newToken", args)
+
+    await client.run_until_disconnected()
 
 async def main():
     #pyinstaller --noconsole --windowed --onefile .\asyncmain.py
@@ -71,10 +85,9 @@ async def main():
     MainWindow.show()
     time.sleep(1)
     ui.listenEvent(event_bus)
-    #sys.exit(app.exec_(), client.disconnect())
-    sys.exit(app.exec_())
+    sys.exit(app.exec_(), client.disconnect())
 
 asyncio.run(main())
 
-# with client:
-#     client.run_until_disconnected()
+with client:
+    client.run_until_disconnected()

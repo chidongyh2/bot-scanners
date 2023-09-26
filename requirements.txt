@@ -13,3 +13,4 @@ pyautogui
 opencv-python
 numpy
 pytesseract
+cryptg

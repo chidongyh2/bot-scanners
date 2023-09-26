@@ -240,8 +240,6 @@ class ScannerWalletSelenium:
         time.sleep(2)
         subprocess.call([rf'C:\Users\{os.getlogin()}\AppData\Local\exodus\Exodus.exe'])
         time.sleep(5)
-        # pyautogui.write('Hello There')
-        # pyautogui.press('enter')
         #screenshot check cookies pass
         screenshot_login = pyautogui.screenshot(region=(560, 220, 800, 590))
         screenshot_login = cv2.cvtColor(np.array(screenshot_login), cv2.COLOR_RGB2BGR)
