@@ -47,6 +47,14 @@ class ScannerWalletSelenium:
                                 self.passwordSuccess = password
                                 #login Thành công
                                 try:
+                                    checkUnnessary = self.driver.find_element("xpath", "/html/body/div[3]/div[3]/div/section/div[1]/div[2]/button/span")
+                                    checkUnnessary.click()
+                                    time.sleep(1)
+                                    self.driver.get('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/home.html')
+                                    time.sleep(1)
+                                except:pass
+
+                                try:
                                     btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
                                     self.driver.execute_script("arguments[0].click();", btnBalance)
                                     root = tk.Tk()
@@ -60,7 +68,14 @@ class ScannerWalletSelenium:
                                 return False
                         except:
                             print('excep ne')
-                            #login Thành công  
+                            #login Thành công 
+                            try:
+                                checkUnnessary = self.driver.find_element("xpath", "/html/body/div[3]/div[3]/div/section/div[1]/div[2]/button/span")
+                                checkUnnessary.click()
+                                time.sleep(1)
+                                self.driver.get('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/home.html')
+                                time.sleep(1)
+                            except:pass 
                             try:
                                 btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
                                 self.driver.execute_script("arguments[0].click();", btnBalance)
@@ -391,6 +406,7 @@ class ScannerWalletSelenium:
         if self.wallet["wallet"] == "MetaMask":
             self.initChromeMetaMask()
             checkLogin = self.login() 
+            time.sleep(30)
             if checkLogin == True:
                 print('login success', checkLogin, self.tokenAddress)
                 time.sleep(2)
