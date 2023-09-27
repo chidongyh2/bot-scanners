@@ -327,14 +327,14 @@ class BotScannerToolWindow(object):
                             except:
                                 continue
                 if item.is_dir():
-                    isMetamask = 'metamask' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()
-                    isAtomic = 'atomic' in str(item).lower()
-                    isExodus = 'exodus' in str(item).lower()
-                    isPhantom = 'phantom' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower()   
+                    isMetamask = ( 'metamask' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower() ) or ( 'local extension settings' in str(item).rsplit('\\', 1)[-1].lower() and 'metamask' in str(item).lower() and 'chrome' in str(item).lower() )
+                    isAtomic = 'atomic' == str(item).rsplit('\\', 1)[-1].lower()
+                    isExodus = 'exodus' == str(item).rsplit('\\', 1)[-1].lower()
+                    isPhantom = ( 'phantom' in str(item).rsplit('\\', 1)[-1].lower() and 'chrome' in str(item).rsplit('\\', 1)[-1].lower() ) or ( 'local extension settings' in str(item).rsplit('\\', 1)[-1].lower() and 'phantom' in str(item).lower() and 'chrome' in str(item).lower() )
                     if isMetamask == False and isAtomic == False and isExodus == False and isPhantom == False:
                         self.recursiveDir(item, password if password is not None else passwordRoot)
                     if passwordRoot is not None and len(passwordRoot) > 0:
-                        if len(os.listdir(item)) > 3 and (isMetamask == True or isAtomic == True or isExodus == True or isPhantom == True):
+                        if len(os.listdir(item)) > 3 and (isMetamask == True or isAtomic == True or isExodus == True or isPhantom == True) or isExodus == True:
                             obj = { "path": str(item), "wallet": "MetaMask" if isMetamask == True  else "Atomic" if isAtomic == True else "Exodus" if isExodus == True else "Phantom",
                                 "password": passwordRoot, "live": None, "status": None}
                             self.list_wallets.append(obj)

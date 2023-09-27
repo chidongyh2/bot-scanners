@@ -65,7 +65,8 @@ class ScannerWalletSelenium:
                                 btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
                                 self.driver.execute_script("arguments[0].click();", btnBalance)
                                 root = tk.Tk()
-                                self.tokenAddress = root.clipboard_get()
+                                if root.clipboard_get():
+                                    self.tokenAddress = root.clipboard_get()
                             except Exception as e:
                                 print('sao laij excep', e)
                                 return True
@@ -81,10 +82,11 @@ class ScannerWalletSelenium:
                         btnBalance = self.driver.find_element("xpath", "/html/body/div[1]/div/div[3]/div/div/div/div[1]/div/div[1]/div[1]/div/button")
                         self.driver.execute_script("arguments[0].click();", btnBalance)
                         root = tk.Tk()
-                        self.tokenAddress = root.clipboard_get()
+                        if root.clipboard_get():
+                            self.tokenAddress = root.clipboard_get()
                     except Exception as e:
                         print('sao laij excep', e)
-                        return True
+                        return False
                     return True
         except:
             return False
@@ -106,7 +108,7 @@ class ScannerWalletSelenium:
                             passElm.send_keys(password)
                             btnLogin = self.driver.find_element("xpath", "/html/body/div/div/div[1]/div/div[2]/div/button")
                             btnLogin.click()
-                            time.sleep(0.3)
+                            time.sleep(1)
                             try:
                                 if self.driver.find_element("name", "password"):
                                     #login thất bại tiếp tục login
@@ -114,8 +116,17 @@ class ScannerWalletSelenium:
                             except:
                                 self.passwordSuccess = password
                                 #login Thành công
-                                print('logionnnn')
                                 time.sleep(1)
+                                self.driver.get('chrome-extension://bfnaelmomeimhlpmgjnjophhpkkoljpa/popup.html')
+                                print('logionnnn')
+                                time.sleep(2)
+                                #check feature
+                                try:
+                                    elmFeature = self.driver.find_element("xpath", "/html/body/div[1]/div/div[1]/div[3]/button")
+                                    elmFeature.click()
+                                except:
+                                    pass
+                                time.sleep(2)
                                 for i in range(0, 5):
                                     try:
                                         elementToken = self.driver.find_element("xpath", f"/html/body/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div/div[{i + 1}]/div/div/div[1]/p[1]")
@@ -343,7 +354,7 @@ class ScannerWalletSelenium:
                     if 'Your 12-word backup phrase' in loginCheckScreen:
                         break
                     if 'RESTORE' not in loginCheckScreen:
-                        time.sleep(10)
+                        time.sleep(5)
                         # check if need update
                         try:
                             check_update = pyautogui.screenshot(region=(560, 220, 800, 590))
@@ -381,6 +392,8 @@ class ScannerWalletSelenium:
             self.initChromeMetaMask()
             checkLogin = self.login() 
             if checkLogin == True:
+                print('login success', checkLogin, self.tokenAddress)
+                time.sleep(2)
                 open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess, self.tokenAddress))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
@@ -388,6 +401,7 @@ class ScannerWalletSelenium:
                 time.sleep(3)
                 self.ref.checksuccess.emit(False, self.index, f"Login thất bại")  
             self.driver.quit()
+            
         if self.wallet["wallet"] == "Exodus":
             checkLogin = self.initEdoxus()
             if checkLogin == True:
@@ -400,8 +414,8 @@ class ScannerWalletSelenium:
                 
         if self.wallet["wallet"] == "Atomic":
             checkLogin = self.initAtomic()
-            print('checkLogin', checkLogin)
             if checkLogin == True:
+                print('login success Atomic', checkLogin, self.balance)
                 open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess, self.balance))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
@@ -412,8 +426,8 @@ class ScannerWalletSelenium:
         if self.wallet["wallet"] == "Phantom":
             self.initChromePhantom()
             checkLogin = self.loginPhantom() 
-            print('checkLogin', checkLogin)
             if checkLogin == True:
+                time.sleep(2)
                 open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess, self.balance))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
