@@ -13,6 +13,7 @@ import logging
 from PyQt5 import QtCore, QtWidgets
 from EventBus import EventBus
 import datetime
+from telethon.tl.types import InputMessagesFilterDocument
 api_id = '27535321'
 api_hash = '7b915080f6c41357c2ad84ca6e84614a'
 chanelId = -1001192416115
@@ -38,37 +39,32 @@ async def listenTelegram(event_bus):
     try: assert await client.connect()
     except Exception as e: print(str(e))
 
-    # tokenFile = open("channel.txt", 'r')
-    # if tokenFile: 
-    #     list_channel_id = tokenFile.readlines()
-    #     for channel_id in list_channel_id:
-    #         channelIds.append(chanelId)
-    #         async for messageInterface in client.iter_messages(-1001593940980,limit=limit):
-    #             print(arrow.get(messageInterface.date), arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-5))
-    #             if not messageInterface.media == None:
-    #                 print('File Name :', str(messageInterface))
-    #                 path = await client.download_media(messageInterface.media, progress_callback=progress_callback)
-    #                 print('File saved to', path)
-    #                 open("sources/source.txt", 'a+').write("%s\n"%(f"E:\QUYNV\MMO\{str(messageInterface.file.name)}"))
-    #                 time.sleep(2)
-    #                 event_bus.publish("updateData")
+    tokenFile = open("TelegramChannel.txt", 'r')
+    if tokenFile: 
+        list_channel_id = tokenFile.readlines()
+        if list_channel_id and len(list_channel_id) > 0:
+            for channel_id in list_channel_id:
+                channelIds.append(int(channel_id.split("|")[0]))
+                async for messageInterface in client.iter_messages(int(channel_id.split("|")[0]), limit=limit, filter=InputMessagesFilterDocument):
+                    if arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-2):
+                        if not messageInterface.media == None and messageInterface.media.document:
+                            await client.download_media(messageInterface.media, "/data-source", progress_callback=progress_callback)
+                            open("sources/source.txt", 'a+').write("%s\n"%(f"/data-source/{str(messageInterface.file.name)}"))
+                            time.sleep(2)
+                            event_bus.publish("updateData")
 
         
     @client.on(events.NewMessage(chats=channelIds))
     async def my_event_handler(event):
         message = event.message.message
-        print('first', event.message.message, event.message.date)
-        if " 0x" in message:
-            tokenKey = str(message[message.index(" 0x"):(message.index(" 0x") + 43)]).replace(" ", "")
-            amount = message[message.index("amount"):(message.index("amount") + 17)]
-            isSwap = False
-            if "Tests passed" in message:
-                isSwap = True
-            date = arrow.get(event.message.date).to('local').format()
-            print('token from Pancake:', tokenKey.strip(), amount.strip(), isSwap)
-            open("token.txt", 'a+').write("%s|%s|%s|%s\n"%(tokenKey, amount, isSwap, date))
-            args = f"{tokenKey}|{amount}|{isSwap}|{date}"
-            event_bus.publish("newToken", args)
+        try:
+            if not messageInterface.media == None and messageInterface.media.document:
+                await client.download_media(messageInterface.media, "/data-source", progress_callback=progress_callback)
+                open("sources/source.txt", 'a+').write("%s\n"%(f"/data-source/{str(messageInterface.file.name)}"))
+                time.sleep(2)
+                event_bus.publish("newToken")
+        except:
+            pass
 
     await client.run_until_disconnected()
 
