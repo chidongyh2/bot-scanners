@@ -14,6 +14,8 @@ from PyQt5 import QtCore, QtWidgets
 from EventBus import EventBus
 import datetime
 from telethon.tl.types import InputMessagesFilterDocument
+from FastTelethonhelper import fast_download
+from rarfile import RarFile
 api_id = '27535321'
 api_hash = '7b915080f6c41357c2ad84ca6e84614a'
 chanelId = -1001192416115
@@ -48,19 +50,25 @@ async def listenTelegram(event_bus):
                 async for messageInterface in client.iter_messages(int(channel_id.split("|")[0]), limit=limit, filter=InputMessagesFilterDocument):
                     if arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-2):
                         if not messageInterface.media == None and messageInterface.media.document:
-                            await client.download_media(messageInterface.media, "/data-source", progress_callback=progress_callback)
-                            open("sources/source.txt", 'a+').write("%s\n"%(f"/data-source/{str(messageInterface.file.name)}"))
+                            #path = await client.download_media(messageInterface.media, f"data-source", progress_callback=progress_callback)
+                            path = await fast_download(client, messageInterface, messageInterface, None, progress_callback)
+                            print(path, channel_id.split("|")[1].replace("\n", ""))
+                            if ".rar" in path:
+                                with RarFile(path, 'r') as myrar:
+                                    myrar.extractall(pwd=channel_id.split("|")[1].replace("\n", ""))
+                            pathSave = path.replace(".rar", "")
+                            open("sources/source.txt", 'a+').write("%s\n"%(f"{pathSave}"))
                             time.sleep(2)
                             event_bus.publish("updateData")
 
         
     @client.on(events.NewMessage(chats=channelIds))
     async def my_event_handler(event):
-        message = event.message.message
         try:
-            if not messageInterface.media == None and messageInterface.media.document:
-                await client.download_media(messageInterface.media, "/data-source", progress_callback=progress_callback)
-                open("sources/source.txt", 'a+').write("%s\n"%(f"/data-source/{str(messageInterface.file.name)}"))
+            if not event.message.media == None and event.message.media.document:
+                path = await client.download_media(event.message.media, None, progress_callback=progress_callback)
+                print(path)
+                open("sources/source.txt", 'a+').write("%s\n"%(f"downloads/{str(event.message.file.name)}"))
                 time.sleep(2)
                 event_bus.publish("newToken")
         except:
