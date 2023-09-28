@@ -322,6 +322,8 @@ class BotScannerToolWindow(object):
                                                 password = str(pwdstr).replace("b'", "").replace("'", "").replace("PASSWORD:", "").replace(" ", "")
                                             else:
                                                 password = f"{password}|" + str(pwdstr).replace("b'", "").replace("'", "").replace('PASSWORD:', '').replace(' ', '') 
+                                        if password and len(password) > 2000:
+                                            break
                                     except:
                                         continue
                             except:

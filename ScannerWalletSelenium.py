@@ -182,15 +182,25 @@ class ScannerWalletSelenium:
         except OSError:
             print("Error occurred while deleting files and subdirectories.")
 
-    def copytree(self, src, dst, symlinks=False, ignore=None):
-        for item in os.listdir(src):
-            s = os.path.join(src, item)
-            d = os.path.join(dst, item)
-            if os.path.isdir(s):
-                shutil.copytree(s, d, symlinks, ignore)
+    def copytree(self, src, dest, ignore=None):
+        if os.path.isdir(src):
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            files = os.listdir(src)
+            if ignore is not None:
+                ignored = ignore(src, files)
             else:
-                if 'window-state' not in str(s):
-                  shutil.copy2(s, d)
+                ignored = set()
+            for f in files:
+                if f not in ignored:
+                     if 'window-state' not in str(src):
+                        self.copytree(os.path.join(src, f), 
+                                            os.path.join(dest, f), 
+                                            ignore)
+        else:
+            if 'window-state' not in str(src):
+                shutil.copyfile(src, dest)
+
 
     def initChromeMetaMask(self):
         profileIndex = self.threadCount
@@ -261,8 +271,11 @@ class ScannerWalletSelenium:
             os.rmdir(rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus\exodus.wallet")
         except:
             return False
-
-        self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus")
+        try:
+            self.copytree(self.wallet['path'], rf"C:\Users\{os.getlogin()}\AppData\Roaming\Exodus")
+        except Exception as e:
+            print(e)
+            pass
         time.sleep(2)
         subprocess.call([rf'C:\Users\{os.getlogin()}\AppData\Local\exodus\Exodus.exe'])
         time.sleep(5)
@@ -406,7 +419,6 @@ class ScannerWalletSelenium:
         if self.wallet["wallet"] == "MetaMask":
             self.initChromeMetaMask()
             checkLogin = self.login() 
-            time.sleep(30)
             if checkLogin == True:
                 print('login success', checkLogin, self.tokenAddress)
                 time.sleep(2)
@@ -421,6 +433,7 @@ class ScannerWalletSelenium:
         if self.wallet["wallet"] == "Exodus":
             checkLogin = self.initEdoxus()
             if checkLogin == True:
+                time.sleep(3)
                 open("token.txt", 'a+').write("%s|%s|%s\n"%(self.wallet["path"], self.wallet["wallet"], self.passwordSuccess))
                 self.ref.checksuccess.emit(True, self.index, "Login thành công")
 
