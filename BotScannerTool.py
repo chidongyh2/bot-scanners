@@ -396,10 +396,24 @@ class BotScannerToolWindow(object):
         self.msg.setText(text)
         self.msg.show()
 
-    
+    def channelSubscribe(self):
+        self.cb_exodus.setChecked(True)
+        self.cb_metamask.setChecked(True)
+        self.cb_atomic.setChecked(True)
+        self.cb_phantom.setChecked(True)
+        # open read
+        tokenFile = open("sources/source.txt", 'r')
+        if tokenFile: 
+            data = tokenFile.readlines()
+            for source in data:
+                if source.replace("\n", "").split("|")[1] == 'False':
+                    self.LD_link.setText(source.split("|")[0])
+                    break
+            self.CheckFolder
+            self.StartReg
+
     def listenEvent(self, event_bus):
-        # event_bus.subscribe("updateData", self.updateTokenData)
-        # event_bus.subscribe("newToken", self.newToken)
+        event_bus.subscribe("updateData", self.channelSubscribe)
         # thread = threading.Thread(target=self.monitor_jobs)
         # thread.start()
         print("dzo listen")

@@ -41,38 +41,43 @@ async def listenTelegram(event_bus):
     try: assert await client.connect()
     except Exception as e: print(str(e))
 
-    # tokenFile = open("TelegramChannel.txt", 'r')
-    # if tokenFile: 
-    #     list_channel_id = tokenFile.readlines()
-    #     if list_channel_id and len(list_channel_id) > 0:
-    #         for channel_id in list_channel_id:
-    #             channelIds.append(int(channel_id.split("|")[0]))
-    #             async for messageInterface in client.iter_messages(int(channel_id.split("|")[0]), limit=limit, filter=InputMessagesFilterDocument):
-    #                 if arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-2):
-    #                     if not messageInterface.media == None and messageInterface.media.document:
-    #                         #path = await client.download_media(messageInterface.media, f"data-source", progress_callback=progress_callback)
-    #                         path = await fast_download(client, messageInterface, messageInterface, None, progress_callback)
-    #                         print(path, channel_id.split("|")[1].replace("\n", ""))
-    #                         if ".rar" in path:
-    #                             with RarFile(path, 'r') as myrar:
-    #                                 myrar.extractall(pwd=channel_id.split("|")[1].replace("\n", ""))
-    #                         pathSave = path.replace(".rar", "")
-    #                         open("sources/source.txt", 'a+').write("%s\n"%(f"{pathSave}"))
-    #                         time.sleep(2)
-    #                         event_bus.publish("updateData")
+    tokenFile = open("TelegramChannel.txt", 'r')
+    if tokenFile: 
+        list_channel_id = tokenFile.readlines()
+        if list_channel_id and len(list_channel_id) > 0:
+            for channel_id in list_channel_id:
+                channelIds.append(int(channel_id.split("|")[0]))
+                async for messageInterface in client.iter_messages(int(channel_id.split("|")[0]), limit=limit, filter=InputMessagesFilterDocument):
+                    if arrow.get(messageInterface.date) > arrow.get(datetime.datetime.now()) + datetime.timedelta(days=-2):
+                        if not messageInterface.media == None and messageInterface.media.document:
+                            #path = await client.download_media(messageInterface.media, f"data-source", progress_callback=progress_callback)
+                            path = await fast_download(client, messageInterface, messageInterface, None, progress_callback)
+                            print(path, channel_id.split("|")[1].replace("\n", ""))
+                            if ".rar" in path:
+                                with RarFile(path, 'r') as myrar:
+                                    myrar.extractall(pwd=channel_id.split("|")[1].replace("\n", ""))
+                            pathSave = path.replace(".rar", "")
+                            open("sources/source.txt", 'a+').write("%s|%s\n"%(f"{pathSave}", 'False'))
+                            time.sleep(2)
+                            event_bus.publish("updateData")
 
         
-    # @client.on(events.NewMessage(chats=channelIds))
-    # async def my_event_handler(event):
-    #     try:
-    #         if not event.message.media == None and event.message.media.document:
-    #             path = await client.download_media(event.message.media, None, progress_callback=progress_callback)
-    #             print(path)
-    #             open("sources/source.txt", 'a+').write("%s\n"%(f"downloads/{str(event.message.file.name)}"))
-    #             time.sleep(2)
-    #             event_bus.publish("newToken")
-    #     except:
-    #         pass
+    @client.on(events.NewMessage(chats=channelIds))
+    async def my_event_handler(event):
+        try:
+            messageInterface = event.message
+            if not event.message.media == None and event.message.media.document:
+                path = await fast_download(client, messageInterface, messageInterface, None, progress_callback)
+                print(path, channel_id.split("|")[1].replace("\n", ""))
+                if ".rar" in path:
+                    with RarFile(path, 'r') as myrar:
+                        myrar.extractall(pwd=channel_id.split("|")[1].replace("\n", ""))
+                pathSave = path.replace(".rar", "")
+                open("sources/source.txt", 'a+').write("%s|%s\n"%(f"{pathSave}", 'False'))
+                time.sleep(2)
+                event_bus.publish("newToken")
+        except:
+            pass
 
     await client.run_until_disconnected()
 
